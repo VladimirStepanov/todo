@@ -110,7 +110,10 @@ func TestBadContentType(t *testing.T) {
 	data, err := ioutil.ReadAll(res.Body)
 
 	require.NoErrorf(t, err, "Error while ReadAll %v", err)
-	json.Unmarshal(data, &actResp)
+	err = json.Unmarshal(data, &actResp)
+	if err != nil {
+		t.Fatal(err)
+	}
 	require.True(t, reflect.DeepEqual(expResp, actResp), "Error! expResp != actResp")
 
 	// usObj.AssertExpectations(t)
@@ -185,7 +188,11 @@ func TestSignUpInput(t *testing.T) {
 
 				require.NoErrorf(t, err, "Error while ReadAll %v", err)
 
-				json.Unmarshal(data, &resp)
+				err = json.Unmarshal(data, &resp)
+
+				if err != nil {
+					t.Fatal(err)
+				}
 
 				require.True(
 					t, reflect.DeepEqual(tc.expArg, &resp.InvalidArgs[0]), "Error! % != InvalidArgs[0]",

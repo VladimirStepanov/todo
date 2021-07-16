@@ -38,5 +38,7 @@ func main() {
 	handler := handler.New(userService, mailService, logger)
 
 	srv := server.New(cfg.GetServerAddr(), handler.InitRoutes(cfg.Mode))
-	srv.Run()
+	if err := srv.Run(); err != nil {
+		log.Fatal(err)
+	}
 }
