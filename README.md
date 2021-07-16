@@ -2,6 +2,17 @@
 
 Simple REST API TODO application written using Clean Architecture principles
 
+List of used libraries:
+
+* [logrus](github.com/sirupsen/logrus) for logging
+* [gin](github.com/gin-gonic/gin) web framework
+* [cleanenv](github.com/ilyakaznacheev/cleanenv) for reading config
+* [sqlx](github.com/jmoiron/sqlx) for working with DB
+* [testify](github.com/stretchr/testify) for testing (mock, require)
+* [go-sqlmock](github.com/DATA-DOG/go-sqlmock) for database mocking
+
+* Testing: 
+
 
 ## Startup configuration [file .env in root]
 
