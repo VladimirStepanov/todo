@@ -11,9 +11,6 @@ List of used libraries:
 * [testify](github.com/stretchr/testify) for testing (mock, require)
 * [go-sqlmock](github.com/DATA-DOG/go-sqlmock) for database mocking
 
-* Testing: 
-
-
 ## Startup configuration [file .env in root]
 
 ```env
