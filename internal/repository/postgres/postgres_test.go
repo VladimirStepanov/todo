@@ -1,0 +1,127 @@
+package postgres
+
+import (
+	"fmt"
+	"testing"
+
+	"github.com/DATA-DOG/go-sqlmock"
+	"github.com/VladimirStepanov/todo-app/internal/models"
+	"github.com/jmoiron/sqlx"
+	"github.com/lib/pq"
+	"github.com/stretchr/testify/require"
+)
+
+var testUser = models.User{
+	Email: "test@mail.com", Password: "helloworld", IsActivated: false, ActivatedLink: "activated_link",
+}
+
+func TestCreateSuccess(t *testing.T) {
+	mockDB, mock, err := sqlmock.New()
+
+	if err != nil {
+		t.Fatal("Error while sqlmock.New()", err)
+	}
+
+	defer mockDB.Close()
+
+	db := sqlx.NewDb(mockDB, "sqlmock")
+
+	pr := NewPostgresRepository(db)
+	var retID int64 = 1
+	rows := sqlmock.NewRows([]string{"id"}).AddRow(retID)
+	mock.ExpectQuery("INSERT INTO users").
+		WithArgs(testUser.Email, testUser.Password, testUser.ActivatedLink).
+		WillReturnRows(rows)
+
+	var inputUser models.User = testUser
+
+	retUser, err := pr.Create(&inputUser)
+
+	require.Equal(t, retUser.ID, retID)
+	require.NoError(t, err)
+
+}
+
+func TestCreateErrors(t *testing.T) {
+	mockDB, mock, err := sqlmock.New()
+
+	if err != nil {
+		t.Fatal("Error while sqlmock.New()", err)
+	}
+
+	defer mockDB.Close()
+
+	db := sqlx.NewDb(mockDB, "sqlmock")
+
+	pr := NewPostgresRepository(db)
+
+	unknownError := fmt.Errorf("Unknown error")
+
+	tests := []struct {
+		willRetErr error
+		expRetErr  error
+	}{
+		{unknownError, unknownError},
+		{&pq.Error{Code: "23505"}, models.ErrUserAlreadyExists},
+	}
+
+	for _, tc := range tests {
+		mock.ExpectQuery("INSERT INTO users").
+			WithArgs(testUser.Email, testUser.Password, testUser.ActivatedLink).
+			WillReturnError(tc.willRetErr)
+		var inputUser models.User = testUser
+		_, err := pr.Create(&inputUser)
+		require.EqualError(t, err, tc.expRetErr.Error())
+	}
+}
+
+// func TestCreate(t *testing.T) {
+// 	mockDB, mock, err := sqlmock.New()
+
+// 	if err != nil {
+// 		t.Fatal("Error while sqlmock.New()", err)
+// 	}
+
+// 	defer mockDB.Close()
+
+// 	db := sqlx.NewDb(mockDB, "sqlmock")
+
+// 	pr := NewPostgresRepository(db)
+
+// 	testCases := []struct {
+// 		expUser    *models.User
+// 		retID      int64
+// 		willRetErr error
+// 		expErr     error
+// 		action     func(retID int64, willRetErr error)
+// 	}{
+// 		{&models.User{
+// 			1,
+// 			testUser.Email,
+// 			testUser.Password,
+// 			testUser.IsActivated,
+// 			testUser.ActivatedLink,
+// 		},
+// 			1,
+// 			nil,
+// 			nil,
+// 			func(retID int64, willRetErr error) {
+// 				rows := sqlmock.NewRows([]string{"id"}).AddRow(retID)
+// 				mock.ExpectQuery("INSERT INTO users").
+// 					WithArgs(testUser.Email, testUser.Password, testUser.ActivatedLink).
+// 					WillReturnRows(rows)
+
+// 			},
+// 		},
+// 	}
+
+// 	// mock.ExpectQuery("INSERT INTO users").
+// 	// 	WithArgs(testUser.Email, testUser.Password, testUser.ActivatedLink).
+// 	// 	WillReturnError(&pq.Error{Code: "23505"})
+
+// 	// mock.ExpectQuery("INSERT INTO users").
+// 	// 	WithArgs(testUser.Email, testUser.Password, testUser.ActivatedLink).
+// 	// 	WillReturnError(fmt.Errorf("Error..."))
+// 	// _, err = pr.Create(&testUser)
+// 	// require.EqualError(t, err, fmt.Errorf("Error...").Error())
+// }

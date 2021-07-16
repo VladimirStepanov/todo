@@ -1,0 +1,12 @@
+version: "3.7"
+services:
+    test_todo:
+        build:
+            context: ./
+            dockerfile: Dockerfile-prod
+        volumes:
+            - ./../:/app
+        environment:
+            CGO_ENABLED: 0
+        entrypoint: go test -v ./...
+    
