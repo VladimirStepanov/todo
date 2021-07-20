@@ -1,0 +1,32 @@
+version: "3.7"
+
+services:
+    it_tests_todo_db:
+        image: postgres:latest
+        restart: always
+        environment:
+            POSTGRES_PASSWORD: test
+            POSTGRES_DB: todo
+            POSTGRES_USER: test
+        expose:
+            - "5434"
+        ports:
+            - "5434:5434"
+        command: -p 5434
+    
+    it_test_todo:
+        build:
+            context: ./
+            dockerfile: Dockerfile-it-tests
+        environment:
+            POSTGRES_PASSWORD: test
+            POSTGRES_DB: todo
+            POSTGRES_USER: test
+            POSTGRES_PORT: 5434
+            MIGRATE_DB_HOST: it_tests_todo_db
+            POSTGRES_HOST: it_tests_todo_db
+            CGO_ENABLED: 0
+        volumes:
+            - ./../:/app
+        entrypoint: sh scripts/run-it-tests.sh
+    

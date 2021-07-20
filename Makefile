@@ -13,4 +13,7 @@ migratedown:
 test:
 	@docker-compose -f docker/docker-compose-test.yml up --build
 
-.PHONY: rebuild prod migrateup migratedown test
+test.integrations:
+	@docker-compose -f docker/docker-compose-it-tests.yml up --build
+
+.PHONY: rebuild prod migrateup migratedown test test.integrations
