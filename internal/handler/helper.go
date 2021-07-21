@@ -16,6 +16,13 @@ type BindDataError struct {
 	InvalidArgs []invalidArgument `json:"invalidArgs"`
 }
 
+func (h *Handler) PageNotFound(c *gin.Context) {
+	c.JSON(http.StatusNotFound, gin.H{
+		"status":  "error",
+		"message": "Page not found",
+	})
+}
+
 func (h *Handler) InternalError(c *gin.Context, err error) {
 	h.logger.Error(err)
 	c.JSON(http.StatusInternalServerError, gin.H{
