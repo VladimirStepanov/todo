@@ -10,7 +10,34 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestUserServiceReturn(t *testing.T) {
+func TestConfirmEmail(t *testing.T) {
+	retErr := errors.New("Some error")
+
+	tests := []struct {
+		name   string
+		retErr error
+		expErr error
+	}{
+		{"No error", nil, nil},
+		{"With error", retErr, retErr},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			repoMock := new(mocks.UserRepository)
+			repoMock.On("ConfirmEmail", mock.Anything).Return(tc.retErr)
+			us := NewUserService(repoMock)
+
+			err := us.ConfirmEmail("test")
+
+			require.Equal(t, tc.expErr, err)
+			repoMock.AssertExpectations(t)
+		})
+	}
+
+}
+
+func TestCreate(t *testing.T) {
 	retErr := errors.New("Some error")
 
 	tests := []struct {
