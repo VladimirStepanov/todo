@@ -8,5 +8,5 @@ services:
             - ./../:/app
         environment:
             CGO_ENABLED: 0
-        entrypoint: go test -v ./...
+        entrypoint: go test -v -short ./...
     

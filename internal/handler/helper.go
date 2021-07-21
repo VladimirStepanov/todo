@@ -6,6 +6,11 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+type ErrorResponse struct {
+	Status  string `json:"status"`
+	Message string `json:"message"`
+}
+
 type BindDataError struct {
 	Err         string            `json:"error"`
 	InvalidArgs []invalidArgument `json:"invalidArgs"`
