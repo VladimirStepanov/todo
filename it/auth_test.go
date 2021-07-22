@@ -65,3 +65,59 @@ func (suite *TestingSuite) TestSignUp() {
 		})
 	}
 }
+
+func (suite *TestingSuite) TestEmailConfirmation() {
+	tests := []struct {
+		name   string
+		link   string
+		code   int
+		errMsg string
+	}{
+		{
+			"Success confirmation",
+			notConfirmedUser.ActivatedLink,
+			http.StatusOK,
+			"",
+		},
+		{
+			"Already confirmation",
+			confirmedUser.ActivatedLink,
+			http.StatusNotFound,
+			"Page not found",
+		},
+		{
+			"Unknown confirmation link",
+			"unknown-link",
+			http.StatusNotFound,
+			"Page not found",
+		},
+	}
+
+	for _, tc := range tests {
+		suite.T().Run(tc.name, func(t *testing.T) {
+			req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/auth/confirm/%s", tc.link), nil)
+			w := httptest.NewRecorder()
+			suite.router.ServeHTTP(w, req)
+
+			res := w.Result()
+
+			defer res.Body.Close()
+			require.Equalf(
+				t, tc.code, res.StatusCode,
+				"Error! Expected code: %d, but got %d\n", tc.code, res.StatusCode,
+			)
+
+			data, err := ioutil.ReadAll(res.Body)
+
+			require.NoErrorf(t, err, "Error while ReadAll %v", err)
+
+			if tc.errMsg != "" {
+				resp := handler.ErrorResponse{}
+				err = json.Unmarshal(data, &resp)
+				require.Equal(t, resp.Status, "error")
+				require.NoErrorf(t, err, "Error while Unmarshal %v", err)
+				require.Equal(t, tc.errMsg, resp.Message)
+			}
+		})
+	}
+}

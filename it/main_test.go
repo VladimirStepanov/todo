@@ -24,21 +24,36 @@ type TestingSuite struct {
 }
 
 var userForCreate = &models.User{
-	ID:            0,
 	Email:         "alreadyexists@mail.ru",
 	Password:      "123456789",
 	IsActivated:   false,
-	ActivatedLink: "activate_link",
+	ActivatedLink: "user_for_create",
+}
+
+var notConfirmedUser = &models.User{
+	Email:         "notconfirm@mail.ru",
+	Password:      "123456789",
+	IsActivated:   false,
+	ActivatedLink: "not_confirmed_user",
+}
+
+var confirmedUser = &models.User{
+	Email:         "confirmed@mail.ru",
+	Password:      "123456789",
+	IsActivated:   true,
+	ActivatedLink: "confirmed_user",
 }
 
 var dataForInsert = []*models.User{
 	userForCreate,
+	notConfirmedUser,
+	confirmedUser,
 }
 
 func initDb(t *testing.T, db *sqlx.DB) {
 
 	for _, u := range dataForInsert {
-		_, err := db.NamedExec("INSERT INTO users(id, email, password_hash, is_activated, activated_link) values(:id, :email, :password, :is_activated, :activated_link)", u)
+		_, err := db.NamedExec("INSERT INTO users(email, password_hash, is_activated, activated_link) values(:email, :password, :is_activated, :activated_link)", u)
 		if err != nil {
 			t.Fatal("Error while initDb", err)
 		}
