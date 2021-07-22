@@ -63,11 +63,32 @@ Params (json):
 * email [string]
 * password [string]
 
+#### Request
 ```bash
 curl -L -X POST 'localhost:8080/auth/sign-up' -H 'Content-Type: application/json' --data-raw '{
     "email": "test1234test@mmail.com",
     "password": "1234567891"
 }'
+```
+
+#### Response
+
+```json
+{
+    "status":"success",
+}
+```
+
+## Email confirmation
+
+`GET /auth/confirm/:activated_link`
+
+Params (URL):
+* activated_link [string]
+
+#### Request
+```bash
+curl http://localhost:8080/auth/confirm/238930b6-b3f3-461c-9cbd-f59e7e6bf072
 ```
 
 #### Response
