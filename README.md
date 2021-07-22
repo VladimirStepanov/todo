@@ -50,7 +50,8 @@ make migratedown
 ## Tests
 
 ```bash
-make test
+make test #unit testing
+make test.integrations #integration testing
 ```
 
 # Endpoints
