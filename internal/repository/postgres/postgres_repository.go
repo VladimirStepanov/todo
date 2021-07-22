@@ -34,3 +34,19 @@ func (pr *PostgresRepository) Create(user *models.User) (*models.User, error) {
 	user.ID = insertedID
 	return user, nil
 }
+
+func (pr *PostgresRepository) ConfirmEmail(Link string) error {
+	res, err := pr.DB.Exec("UPDATE users SET is_activated=TRUE WHERE activated_link=$1 AND is_activated=FALSE", Link)
+	if err != nil {
+		return err
+	}
+
+	ra, err := res.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if ra == 0 {
+		return models.ErrConfirmLinkNotExists
+	}
+	return nil
+}

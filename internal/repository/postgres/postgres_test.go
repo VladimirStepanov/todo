@@ -12,7 +12,10 @@ import (
 )
 
 var testUser = models.User{
-	Email: "test@mail.com", Password: "helloworld", IsActivated: false, ActivatedLink: "activated_link",
+	Email:         "test@mail.com",
+	Password:      "helloworld",
+	IsActivated:   false,
+	ActivatedLink: "activated_link",
 }
 
 func TestCreateSuccess(t *testing.T) {
@@ -75,53 +78,31 @@ func TestCreateErrors(t *testing.T) {
 	}
 }
 
-// func TestCreate(t *testing.T) {
-// 	mockDB, mock, err := sqlmock.New()
+func TestConfirmEmail(t *testing.T) {
+	mockDB, mock, err := sqlmock.New()
 
-// 	if err != nil {
-// 		t.Fatal("Error while sqlmock.New()", err)
-// 	}
+	if err != nil {
+		t.Fatal("Error while sqlmock.New()", err)
+	}
 
-// 	defer mockDB.Close()
+	defer mockDB.Close()
 
-// 	db := sqlx.NewDb(mockDB, "sqlmock")
+	db := sqlx.NewDb(mockDB, "sqlmock")
 
-// 	pr := NewPostgresRepository(db)
+	tests := []struct {
+		name         string
+		rowsAffected int
+		retErr       error
+	}{
+		{"Success update", 1, nil},
+		{"Error update", 0, models.ErrConfirmLinkNotExists},
+	}
 
-// 	testCases := []struct {
-// 		expUser    *models.User
-// 		retID      int64
-// 		willRetErr error
-// 		expErr     error
-// 		action     func(retID int64, willRetErr error)
-// 	}{
-// 		{&models.User{
-// 			1,
-// 			testUser.Email,
-// 			testUser.Password,
-// 			testUser.IsActivated,
-// 			testUser.ActivatedLink,
-// 		},
-// 			1,
-// 			nil,
-// 			nil,
-// 			func(retID int64, willRetErr error) {
-// 				rows := sqlmock.NewRows([]string{"id"}).AddRow(retID)
-// 				mock.ExpectQuery("INSERT INTO users").
-// 					WithArgs(testUser.Email, testUser.Password, testUser.ActivatedLink).
-// 					WillReturnRows(rows)
+	for _, tc := range tests {
+		pr := NewPostgresRepository(db)
+		mock.ExpectExec("UPDATE users").WillReturnResult(sqlmock.NewResult(0, int64(tc.rowsAffected)))
+		err := pr.ConfirmEmail("testlink")
 
-// 			},
-// 		},
-// 	}
-
-// 	// mock.ExpectQuery("INSERT INTO users").
-// 	// 	WithArgs(testUser.Email, testUser.Password, testUser.ActivatedLink).
-// 	// 	WillReturnError(&pq.Error{Code: "23505"})
-
-// 	// mock.ExpectQuery("INSERT INTO users").
-// 	// 	WithArgs(testUser.Email, testUser.Password, testUser.ActivatedLink).
-// 	// 	WillReturnError(fmt.Errorf("Error..."))
-// 	// _, err = pr.Create(&testUser)
-// 	// require.EqualError(t, err, fmt.Errorf("Error...").Error())
-// }
+		require.Equal(t, tc.retErr, err)
+	}
+}
