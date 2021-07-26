@@ -1,6 +1,7 @@
 package postgres
 
 import (
+	"database/sql"
 	"fmt"
 	"testing"
 
@@ -105,4 +106,65 @@ func TestConfirmEmail(t *testing.T) {
 
 		require.Equal(t, tc.retErr, err)
 	}
+}
+
+func TestFindUserByEmailErrors(t *testing.T) {
+	mockDB, mock, err := sqlmock.New()
+
+	if err != nil {
+		t.Fatal("Error while sqlmock.New()", err)
+	}
+
+	defer mockDB.Close()
+
+	db := sqlx.NewDb(mockDB, "sqlmock")
+
+	pr := NewPostgresRepository(db)
+
+	unknownError := fmt.Errorf("Unknown error")
+	tests := []struct {
+		willRetErr error
+		expRetErr  error
+	}{
+		{unknownError, unknownError},
+		{sql.ErrNoRows, models.ErrUserNotFound},
+	}
+
+	for _, tc := range tests {
+		mock.ExpectQuery("SELECT FROM users").
+			WithArgs(testUser.Email).
+			WillReturnError(tc.willRetErr)
+		_, err := pr.FindUserByEmail(testUser.Email)
+		require.EqualError(t, err, tc.expRetErr.Error())
+	}
+}
+
+func TestFindUserByEmailSuccess(t *testing.T) {
+	mockDB, mock, err := sqlmock.New()
+
+	if err != nil {
+		t.Fatal("Error while sqlmock.New()", err)
+	}
+
+	defer mockDB.Close()
+
+	db := sqlx.NewDb(mockDB, "sqlmock")
+
+	pr := NewPostgresRepository(db)
+	var retID int64 = 1
+	rows := sqlmock.NewRows(
+		[]string{"id", "email", "password", "is_activated", "activated_link"},
+	).AddRow(retID, testUser.Email, testUser.Password, testUser.IsActivated, testUser.ActivatedLink)
+	mock.ExpectQuery("SELECT FROM users").
+		WithArgs(testUser.Email).
+		WillReturnRows(rows)
+
+	var inputUser models.User = testUser
+	inputUser.ID = retID
+
+	retUser, err := pr.FindUserByEmail(testUser.Email)
+
+	require.Equal(t, retUser, &inputUser)
+	require.NoError(t, err)
+
 }

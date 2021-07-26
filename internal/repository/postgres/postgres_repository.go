@@ -1,6 +1,8 @@
 package postgres
 
 import (
+	"database/sql"
+
 	"github.com/VladimirStepanov/todo-app/internal/models"
 	"github.com/jmoiron/sqlx"
 	"github.com/lib/pq"
@@ -52,5 +54,16 @@ func (pr *PostgresRepository) ConfirmEmail(Link string) error {
 }
 
 func (pr *PostgresRepository) FindUserByEmail(Email string) (*models.User, error) {
-	return nil, nil
+	user := &models.User{}
+
+	err := pr.DB.Get(user, "SELECT FROM users WHERE email=$1", Email)
+
+	if err != nil {
+		if err == sql.ErrNoRows {
+			err = models.ErrUserNotFound
+		}
+		return nil, err
+	}
+
+	return user, nil
 }
