@@ -50,3 +50,7 @@ func (pr *PostgresRepository) ConfirmEmail(Link string) error {
 	}
 	return nil
 }
+
+func (pr *PostgresRepository) FindUserByEmail(Email string) (*models.User, error) {
+	return nil, nil
+}

@@ -48,3 +48,26 @@ func (_m *UserRepository) Create(user *models.User) (*models.User, error) {
 
 	return r0, r1
 }
+
+// FindUserByEmail provides a mock function with given fields: Email
+func (_m *UserRepository) FindUserByEmail(Email string) (*models.User, error) {
+	ret := _m.Called(Email)
+
+	var r0 *models.User
+	if rf, ok := ret.Get(0).(func(string) *models.User); ok {
+		r0 = rf(Email)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*models.User)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(string) error); ok {
+		r1 = rf(Email)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
