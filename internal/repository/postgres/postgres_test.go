@@ -131,7 +131,7 @@ func TestFindUserByEmailErrors(t *testing.T) {
 	}
 
 	for _, tc := range tests {
-		mock.ExpectQuery("SELECT FROM users").
+		mock.ExpectQuery("SELECT (.+) FROM users").
 			WithArgs(testUser.Email).
 			WillReturnError(tc.willRetErr)
 		_, err := pr.FindUserByEmail(testUser.Email)
@@ -155,7 +155,7 @@ func TestFindUserByEmailSuccess(t *testing.T) {
 	rows := sqlmock.NewRows(
 		[]string{"id", "email", "password_hash", "is_activated", "activated_link"},
 	).AddRow(retID, testUser.Email, testUser.Password, testUser.IsActivated, testUser.ActivatedLink)
-	mock.ExpectQuery("SELECT FROM users").
+	mock.ExpectQuery("SELECT (.+) FROM users").
 		WithArgs(testUser.Email).
 		WillReturnRows(rows)
 

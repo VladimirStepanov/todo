@@ -56,7 +56,7 @@ func (pr *PostgresRepository) ConfirmEmail(Link string) error {
 func (pr *PostgresRepository) FindUserByEmail(Email string) (*models.User, error) {
 	user := &models.User{}
 
-	err := pr.DB.Get(user, "SELECT FROM users WHERE email=$1", Email)
+	err := pr.DB.Get(user, "SELECT * FROM users WHERE email=$1", Email)
 
 	if err != nil {
 		if err == sql.ErrNoRows {
