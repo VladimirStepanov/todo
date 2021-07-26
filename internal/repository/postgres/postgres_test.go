@@ -127,7 +127,7 @@ func TestFindUserByEmailErrors(t *testing.T) {
 		expRetErr  error
 	}{
 		{unknownError, unknownError},
-		{sql.ErrNoRows, models.ErrUserNotFound},
+		{sql.ErrNoRows, models.ErrBadUser},
 	}
 
 	for _, tc := range tests {

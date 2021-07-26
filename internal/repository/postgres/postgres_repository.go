@@ -60,7 +60,7 @@ func (pr *PostgresRepository) FindUserByEmail(Email string) (*models.User, error
 
 	if err != nil {
 		if err == sql.ErrNoRows {
-			err = models.ErrUserNotFound
+			err = models.ErrBadUser
 		}
 		return nil, err
 	}
