@@ -153,7 +153,7 @@ func TestFindUserByEmailSuccess(t *testing.T) {
 	pr := NewPostgresRepository(db)
 	var retID int64 = 1
 	rows := sqlmock.NewRows(
-		[]string{"id", "email", "password", "is_activated", "activated_link"},
+		[]string{"id", "email", "password_hash", "is_activated", "activated_link"},
 	).AddRow(retID, testUser.Email, testUser.Password, testUser.IsActivated, testUser.ActivatedLink)
 	mock.ExpectQuery("SELECT FROM users").
 		WithArgs(testUser.Email).

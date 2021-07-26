@@ -53,7 +53,7 @@ var dataForInsert = []*models.User{
 func initDb(t *testing.T, db *sqlx.DB) {
 
 	for _, u := range dataForInsert {
-		_, err := db.NamedExec("INSERT INTO users(email, password_hash, is_activated, activated_link) values(:email, :password, :is_activated, :activated_link)", u)
+		_, err := db.NamedExec("INSERT INTO users(email, password_hash, is_activated, activated_link) values(:email, :password_hash, :is_activated, :activated_link)", u)
 		if err != nil {
 			t.Fatal("Error while initDb", err)
 		}
