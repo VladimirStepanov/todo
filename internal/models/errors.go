@@ -6,4 +6,5 @@ var (
 	ErrUserAlreadyExists    = errors.New("user already exists")
 	ErrConfirmLinkNotExists = errors.New("confirm link not found")
 	ErrBadUser              = errors.New("invalid email or password")
+	ErrUserNotActivated     = errors.New("user is not activated")
 )
