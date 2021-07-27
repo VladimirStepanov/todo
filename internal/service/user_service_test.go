@@ -10,16 +10,26 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestConfirmEmail(t *testing.T) {
-	retErr := errors.New("Some error")
+var testEmail = "test@test.ru"
+var testPassword = "123456789"
+var ErrSome = errors.New("unknown error")
 
+var testUser = &models.User{
+	ID:            1,
+	Email:         testEmail,
+	Password:      "$2a$10$wHVm4AGd.uq.dR7Zk3VjhOJWLEt9WPXEqoCPx5AEzPtH31o7WiY92",
+	IsActivated:   false,
+	ActivatedLink: "344bda23-9f93-48bf-967c-6b92086baac0",
+}
+
+func TestConfirmEmail(t *testing.T) {
 	tests := []struct {
 		name   string
 		retErr error
 		expErr error
 	}{
 		{"No error", nil, nil},
-		{"With error", retErr, retErr},
+		{"With error", ErrSome, ErrSome},
 	}
 
 	for _, tc := range tests {
@@ -38,8 +48,6 @@ func TestConfirmEmail(t *testing.T) {
 }
 
 func TestCreate(t *testing.T) {
-	retErr := errors.New("Some error")
-
 	tests := []struct {
 		name  string
 		err   error
@@ -47,7 +55,7 @@ func TestCreate(t *testing.T) {
 		email string
 	}{
 		{"No error", nil, &models.User{Email: "hello@world.ru"}, "hello@world.ru"},
-		{"With error", retErr, nil, "error@world.ru"},
+		{"With error", ErrSome, nil, "error@world.ru"},
 	}
 
 	for _, tc := range tests {
@@ -69,6 +77,76 @@ func TestCreate(t *testing.T) {
 				require.False(t, user.IsActivated)
 
 			}
+			repoMock.AssertExpectations(t)
+		})
+	}
+}
+
+func TestSignIn(t *testing.T) {
+	tests := []struct {
+		name        string
+		password    string
+		repoRetUser func() *models.User
+		repoRetErr  error
+		expErr      error
+	}{
+		{
+			name:     "Return unknown error",
+			password: testPassword,
+			repoRetUser: func() *models.User {
+				return nil
+			},
+			repoRetErr: ErrSome,
+			expErr:     ErrSome,
+		},
+		{
+			name:     "User not found",
+			password: testPassword,
+			repoRetUser: func() *models.User {
+				return nil
+			},
+			repoRetErr: models.ErrBadUser,
+			expErr:     models.ErrBadUser,
+		},
+		{
+			name:     "User not found",
+			password: "bad_password",
+			repoRetUser: func() *models.User {
+				return testUser
+			},
+			repoRetErr: nil,
+			expErr:     models.ErrBadUser,
+		},
+		{
+			name:     "User is not activated",
+			password: testPassword,
+			repoRetUser: func() *models.User {
+				return testUser
+			},
+			repoRetErr: nil,
+			expErr:     models.ErrUserNotActivated,
+		},
+		{
+			name:     "Valid user",
+			password: testPassword,
+			repoRetUser: func() *models.User {
+				var u models.User = *testUser
+				u.IsActivated = true
+				return &u
+			},
+			repoRetErr: nil,
+			expErr:     nil,
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			repoMock := new(mocks.UserRepository)
+			repoMock.On("FindUserByEmail", mock.AnythingOfType("string")).Return(tc.repoRetUser(), tc.repoRetErr)
+			us := NewUserService(repoMock)
+
+			err := us.SignIn(testEmail, tc.password)
+			require.Equal(t, err, tc.expErr)
 			repoMock.AssertExpectations(t)
 		})
 	}

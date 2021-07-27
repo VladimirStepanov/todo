@@ -28,3 +28,20 @@ func (us *UserService) Create(Email, Password string) (*models.User, error) {
 func (us *UserService) ConfirmEmail(Link string) error {
 	return us.repo.ConfirmEmail(Link)
 }
+
+func (us *UserService) SignIn(Email, Password string) error {
+	user, err := us.repo.FindUserByEmail(Email)
+
+	if err != nil {
+		return err
+	}
+
+	if bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(Password)) != nil {
+		return models.ErrBadUser
+	}
+
+	if !user.IsActivated {
+		return models.ErrUserNotActivated
+	}
+	return nil
+}
