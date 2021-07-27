@@ -29,19 +29,19 @@ func (us *UserService) ConfirmEmail(Link string) error {
 	return us.repo.ConfirmEmail(Link)
 }
 
-func (us *UserService) SignIn(Email, Password string) error {
+func (us *UserService) SignIn(Email, Password string) (*models.User, error) {
 	user, err := us.repo.FindUserByEmail(Email)
 
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	if bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(Password)) != nil {
-		return models.ErrBadUser
+		return nil, models.ErrBadUser
 	}
 
 	if !user.IsActivated {
-		return models.ErrUserNotActivated
+		return nil, models.ErrUserNotActivated
 	}
-	return nil
+	return user, nil
 }

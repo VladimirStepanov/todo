@@ -89,6 +89,7 @@ func TestSignIn(t *testing.T) {
 		repoRetUser func() *models.User
 		repoRetErr  error
 		expErr      error
+		expUser     func() *models.User
 	}{
 		{
 			name:     "Return unknown error",
@@ -98,6 +99,9 @@ func TestSignIn(t *testing.T) {
 			},
 			repoRetErr: ErrSome,
 			expErr:     ErrSome,
+			expUser: func() *models.User {
+				return nil
+			},
 		},
 		{
 			name:     "User not found",
@@ -107,6 +111,9 @@ func TestSignIn(t *testing.T) {
 			},
 			repoRetErr: models.ErrBadUser,
 			expErr:     models.ErrBadUser,
+			expUser: func() *models.User {
+				return nil
+			},
 		},
 		{
 			name:     "User not found",
@@ -116,6 +123,9 @@ func TestSignIn(t *testing.T) {
 			},
 			repoRetErr: nil,
 			expErr:     models.ErrBadUser,
+			expUser: func() *models.User {
+				return nil
+			},
 		},
 		{
 			name:     "User is not activated",
@@ -125,6 +135,9 @@ func TestSignIn(t *testing.T) {
 			},
 			repoRetErr: nil,
 			expErr:     models.ErrUserNotActivated,
+			expUser: func() *models.User {
+				return nil
+			},
 		},
 		{
 			name:     "Valid user",
@@ -136,6 +149,11 @@ func TestSignIn(t *testing.T) {
 			},
 			repoRetErr: nil,
 			expErr:     nil,
+			expUser: func() *models.User {
+				var u models.User = *testUser
+				u.IsActivated = true
+				return &u
+			},
 		},
 	}
 
@@ -145,8 +163,9 @@ func TestSignIn(t *testing.T) {
 			repoMock.On("FindUserByEmail", mock.AnythingOfType("string")).Return(tc.repoRetUser(), tc.repoRetErr)
 			us := NewUserService(repoMock)
 
-			err := us.SignIn(testEmail, tc.password)
+			u, err := us.SignIn(testEmail, tc.password)
 			require.Equal(t, err, tc.expErr)
+			require.Equal(t, u, tc.expUser())
 			repoMock.AssertExpectations(t)
 		})
 	}

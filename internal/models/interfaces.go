@@ -3,7 +3,7 @@ package models
 type UserService interface {
 	Create(Email, Password string) (*User, error)
 	ConfirmEmail(Link string) error
-	SignIn(Email, Password string) error
+	SignIn(Email, Password string) (*User, error)
 }
 
 type UserRepository interface {

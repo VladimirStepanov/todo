@@ -50,15 +50,24 @@ func (_m *UserService) Create(Email string, Password string) (*models.User, erro
 }
 
 // SignIn provides a mock function with given fields: Email, Password
-func (_m *UserService) SignIn(Email string, Password string) error {
+func (_m *UserService) SignIn(Email string, Password string) (*models.User, error) {
 	ret := _m.Called(Email, Password)
 
-	var r0 error
-	if rf, ok := ret.Get(0).(func(string, string) error); ok {
+	var r0 *models.User
+	if rf, ok := ret.Get(0).(func(string, string) *models.User); ok {
 		r0 = rf(Email, Password)
 	} else {
-		r0 = ret.Error(0)
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*models.User)
+		}
 	}
 
-	return r0
+	var r1 error
+	if rf, ok := ret.Get(1).(func(string, string) error); ok {
+		r1 = rf(Email, Password)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
 }
