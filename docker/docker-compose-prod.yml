@@ -20,6 +20,13 @@ services:
             - "${POSTGRES_PORT}:${POSTGRES_PORT}"
         command: -p ${POSTGRES_PORT}
     
+    tokendb:
+        env_file: ../.env
+        image: "redis:alpine"
+        command: --port ${REDIS_PORT}
+        ports:
+            - "${REDIS_PORT}:${REDIS_PORT}"
+    
     todo:
         env_file: ../.env
         depends_on: 
