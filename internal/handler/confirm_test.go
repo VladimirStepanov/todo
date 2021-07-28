@@ -29,7 +29,7 @@ func TestConfirmHandler(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			usObj := new(mocks.UserService)
 			usObj.On("ConfirmEmail", mock.Anything).Return(tc.mockErr)
-			handler := New(usObj, nil, getTestLogger())
+			handler := New(usObj, nil, nil, getTestLogger())
 
 			r := handler.InitRoutes(gin.TestMode)
 			req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/auth/confirm/%s", tc.link), nil)

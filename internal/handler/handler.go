@@ -9,9 +9,10 @@ import (
 )
 
 type Handler struct {
-	UserService models.UserService
-	MailService models.MailService
-	logger      *logrus.Logger
+	UserService  models.UserService
+	MailService  models.MailService
+	TokenService models.TokenService
+	logger       *logrus.Logger
 }
 
 func (h *Handler) InitRoutes(mode string) http.Handler {
@@ -29,6 +30,15 @@ func (h *Handler) InitRoutes(mode string) http.Handler {
 	return r
 }
 
-func New(UserService models.UserService, MailService models.MailService, logger *logrus.Logger) *Handler {
-	return &Handler{UserService: UserService, MailService: MailService, logger: logger}
+func New(
+	UserService models.UserService,
+	MailService models.MailService,
+	TokenService models.TokenService,
+	logger *logrus.Logger) *Handler {
+
+	return &Handler{
+		UserService:  UserService,
+		MailService:  MailService,
+		TokenService: TokenService,
+		logger:       logger}
 }
