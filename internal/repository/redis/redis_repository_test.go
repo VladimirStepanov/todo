@@ -11,7 +11,7 @@ import (
 
 var ErrUnknown = errors.New("unknown error")
 
-func TestSet(t *testing.T) {
+func TestSetTokens(t *testing.T) {
 	tests := []struct {
 		name    string
 		setMock func(m redismock.ClientMock)
@@ -20,16 +20,9 @@ func TestSet(t *testing.T) {
 		{
 			name: "Some error",
 			setMock: func(m redismock.ClientMock) {
-				m.ExpectSet("hello", true, time.Second*10).SetErr(ErrUnknown)
+				m.ExpectWatch("test1", "test2").SetErr(ErrUnknown)
 			},
 			expErr: ErrUnknown,
-		},
-		{
-			name: "Correct set",
-			setMock: func(m redismock.ClientMock) {
-				m.ExpectSet("hello", true, time.Second*10).SetVal("OK")
-			},
-			expErr: nil,
 		},
 	}
 
@@ -38,7 +31,7 @@ func TestSet(t *testing.T) {
 			db, mock := redismock.NewClientMock()
 			tc.setMock(mock)
 			rr := NewRedisRepository(db)
-			err := rr.Set("hello", time.Second*10)
+			err := rr.SetTokens("test1", time.Hour, "test2", time.Hour)
 			require.Equal(t, err, tc.expErr)
 		})
 	}

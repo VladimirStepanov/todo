@@ -18,11 +18,30 @@ func NewRedisRepository(client *redis.Client) models.TokenRepository {
 	}
 }
 
-func (r *RedisRepository) Set(key string, exp time.Duration) error {
+func (r *RedisRepository) SetTokens(accessKey string, accessExp time.Duration, refreshKey string, refreshExp time.Duration) error {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*3)
 	defer cancel()
 
-	return r.client.Set(ctx, key, true, exp).Err()
+	err := r.client.Watch(ctx, func(tx *redis.Tx) error {
+		_, err := tx.TxPipelined(ctx, func(pipe redis.Pipeliner) error {
+			var setErr error
+			keys := map[string]time.Duration{
+				accessKey:  accessExp,
+				refreshKey: refreshExp,
+			}
+
+			for key, exp := range keys {
+				setErr = pipe.Set(ctx, key, true, exp).Err()
+				if setErr != nil {
+					return setErr
+				}
+			}
+			return nil
+		})
+
+		return err
+	}, accessKey, refreshKey)
+	return err
 }
 
 func (r *RedisRepository) Get(key string) (bool, error) {
