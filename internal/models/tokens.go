@@ -2,9 +2,10 @@ package models
 
 type TokenDetails struct {
 	AccessToken  string
-	AccessUid    string
-	AccessET     string
+	AccessET     int64
+	AccessIAT    int64
 	RefreshToken string
-	Refreshuid   string
-	RefreshET    string
+	RefreshET    int64
+	RefreshIAT   int64
+	UUID         string
 }
