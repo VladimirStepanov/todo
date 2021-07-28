@@ -24,6 +24,6 @@ type TokenService interface {
 
 type TokenRepository interface {
 	Get(key string) (bool, error)
-	Set(key string, exp time.Duration) error
+	SetTokens(accessKey string, accessExp time.Duration, refreshKey string, refreshExp time.Duration) error
 	Count(pattern string) (int, error)
 }
