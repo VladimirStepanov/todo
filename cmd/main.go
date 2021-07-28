@@ -6,6 +6,7 @@ import (
 	"github.com/VladimirStepanov/todo-app/internal/config"
 	"github.com/VladimirStepanov/todo-app/internal/handler"
 	"github.com/VladimirStepanov/todo-app/internal/repository/postgres"
+	"github.com/VladimirStepanov/todo-app/internal/repository/redisrepo"
 	"github.com/VladimirStepanov/todo-app/internal/server"
 	"github.com/VladimirStepanov/todo-app/internal/service"
 	"github.com/sirupsen/logrus"
@@ -28,14 +29,22 @@ func main() {
 		return
 	}
 
+	redisClient, err := redisrepo.NewRedisClient(cfg.RedisHost, cfg.RedisPort)
+	if err != nil {
+		log.Println("Can't create new redis client", err)
+		return
+	}
+
+	tokenRepo := redisrepo.NewRedisRepository(redisClient)
 	userRepo := postgres.NewPostgresRepository(db)
 	userService := service.NewUserService(userRepo)
 	mailService := service.NewMailService(cfg.Email, cfg.EmailPassword, cfg.Domain)
+	tokenService := service.NewTokenService(cfg.AccessKey, cfg.RefreshKey, cfg.MaxLoggedIn, tokenRepo)
 
 	logger := logrus.New()
 	logger.SetFormatter(&logrus.JSONFormatter{})
 
-	handler := handler.New(userService, mailService, logger)
+	handler := handler.New(userService, mailService, tokenService, logger)
 
 	srv := server.New(cfg.GetServerAddr(), handler.InitRoutes(cfg.Mode))
 	if err := srv.Run(); err != nil {
