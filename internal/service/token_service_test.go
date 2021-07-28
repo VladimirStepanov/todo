@@ -60,7 +60,7 @@ func TestNewTokenPair(t *testing.T) {
 			repoMock.On("Count", mock.Anything).Return(tc.countRetVal, tc.countRetErr)
 			repoMock.On("SetTokens", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(tc.setTokRet)
 
-			ts := NewTokenService(accessKey, refreshKey, repoMock, maxLoggenIn)
+			ts := NewTokenService(accessKey, refreshKey, maxLoggenIn, repoMock)
 
 			td, err := ts.NewTokenPair(userID)
 

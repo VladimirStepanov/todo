@@ -16,7 +16,7 @@ type TokenService struct {
 	repo        models.TokenRepository
 }
 
-func NewTokenService(accessKey, refreshKey string, repo models.TokenRepository, maxLoggedIn int) models.TokenService {
+func NewTokenService(accessKey, refreshKey string, maxLoggedIn int, repo models.TokenRepository) models.TokenService {
 	return &TokenService{
 		AccessKey:   accessKey,
 		RefreshKey:  refreshKey,
