@@ -58,5 +58,4 @@ jobs:
           CGO_ENABLED: 0
         run: | 
           go run cmd/migrate/migrate.go -direction up
-          go run cmd/migrate/migrate.go -direction up
           go test -v ./it
