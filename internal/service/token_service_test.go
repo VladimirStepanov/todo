@@ -64,7 +64,7 @@ func TestNewTokenPair(t *testing.T) {
 
 			td, err := ts.NewTokenPair(userID)
 
-			require.Equal(t, err, tc.expErr)
+			require.Equal(t, tc.expErr, err)
 
 			if tc.expErr == nil {
 				require.NotEmpty(t, td.AccessToken)

@@ -164,8 +164,8 @@ func TestSignIn(t *testing.T) {
 			us := NewUserService(repoMock)
 
 			u, err := us.SignIn(testEmail, tc.password)
-			require.Equal(t, err, tc.expErr)
-			require.Equal(t, u, tc.expUser())
+			require.Equal(t, tc.expErr, err)
+			require.Equal(t, tc.expUser(), u)
 			repoMock.AssertExpectations(t)
 		})
 	}

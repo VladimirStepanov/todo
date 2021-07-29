@@ -32,7 +32,7 @@ func TestSetTokens(t *testing.T) {
 			tc.setMock(mock)
 			rr := NewRedisRepository(db)
 			err := rr.SetTokens("test1", time.Hour, "test2", time.Hour)
-			require.Equal(t, err, tc.expErr)
+			require.Equal(t, tc.expErr, err)
 		})
 	}
 
@@ -77,7 +77,7 @@ func TestGet(t *testing.T) {
 			tc.setMock(mock)
 			rr := NewRedisRepository(db)
 			val, err := rr.Get("hello")
-			require.Equal(t, err, tc.expErr)
+			require.Equal(t, tc.expErr, err)
 			require.Equal(t, tc.expVal, val)
 		})
 	}
@@ -123,7 +123,7 @@ func TestCount(t *testing.T) {
 			tc.setMock(mock)
 			rr := NewRedisRepository(db)
 			val, err := rr.Count("pattern")
-			require.Equal(t, err, tc.expErr)
+			require.Equal(t, tc.expErr, err)
 			require.Equal(t, tc.expVal, val)
 		})
 	}

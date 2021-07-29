@@ -37,10 +37,7 @@ func TestSendMailReturnForSignUp(t *testing.T) {
 
 	defer res.Body.Close()
 
-	require.Equalf(
-		t, http.StatusInternalServerError, res.StatusCode, "Expected sc: %d, got: %d\n",
-		http.StatusInternalServerError, res.StatusCode,
-	)
+	require.Equal(t, http.StatusInternalServerError, res.StatusCode)
 	usObj.AssertExpectations(t)
 }
 
@@ -73,7 +70,7 @@ func TestCreateErrorForSignUp(t *testing.T) {
 
 			defer res.Body.Close()
 
-			require.Equalf(t, tc.code, res.StatusCode, "Expected sc: %d, got: %d\n", tc.code, res.StatusCode)
+			require.Equal(t, tc.code, res.StatusCode)
 			usObj.AssertExpectations(t)
 		})
 	}
@@ -96,10 +93,7 @@ func TestBadContentType(t *testing.T) {
 
 	defer res.Body.Close()
 
-	require.Equalf(
-		t, http.StatusBadRequest, res.StatusCode,
-		"Error! Expected code: 400, but got %d\n", res.StatusCode,
-	)
+	require.Equal(t, http.StatusBadRequest, res.StatusCode)
 
 	expResp := map[string]interface{}{
 		"error": "/auth/sign-up only accepts Content-Type application/json",
@@ -109,7 +103,7 @@ func TestBadContentType(t *testing.T) {
 
 	data, err := ioutil.ReadAll(res.Body)
 
-	require.NoErrorf(t, err, "Error while ReadAll %v", err)
+	require.NoError(t, err)
 	err = json.Unmarshal(data, &actResp)
 	if err != nil {
 		t.Fatal(err)
@@ -176,10 +170,7 @@ func TestSignUpInput(t *testing.T) {
 
 			defer res.Body.Close()
 
-			require.Equalf(
-				t, tc.code, res.StatusCode,
-				"Error! Expected code: %d, but got %d\n", tc.code, res.StatusCode,
-			)
+			require.Equal(t, tc.code, res.StatusCode)
 
 			if tc.expArg != nil {
 				resp := BindDataError{}

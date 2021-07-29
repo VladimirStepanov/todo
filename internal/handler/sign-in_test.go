@@ -106,16 +106,16 @@ func TestSignIn(t *testing.T) {
 
 			defer res.Body.Close()
 
-			require.Equalf(t, tc.code, res.StatusCode, "Expected sc: %d, got: %d\n", tc.code, res.StatusCode)
+			require.Equal(t, tc.code, res.StatusCode)
 			actResp := map[string]interface{}{}
 
 			data, err := ioutil.ReadAll(res.Body)
-			require.NoErrorf(t, err, "Error while ReadAll %v", err)
+			require.NoError(t, err)
 			err = json.Unmarshal(data, &actResp)
 			require.NoError(t, err)
 			if tc.code != 200 {
-				require.Equal(t, actResp["status"], "error")
-				require.Equal(t, actResp["message"], tc.errMsg)
+				require.Equal(t, "error", actResp["status"])
+				require.Equal(t, tc.errMsg, actResp["message"])
 			} else {
 				require.NotEmpty(t, actResp["access_token"])
 				require.NotEmpty(t, actResp["refresh_token"])

@@ -41,7 +41,7 @@ func TestCreateSuccess(t *testing.T) {
 
 	retUser, err := pr.Create(&inputUser)
 
-	require.Equal(t, retUser.ID, retID)
+	require.Equal(t, retID, retUser.ID)
 	require.NoError(t, err)
 
 }
@@ -104,7 +104,7 @@ func TestConfirmEmail(t *testing.T) {
 		mock.ExpectExec("UPDATE users").WillReturnResult(sqlmock.NewResult(0, int64(tc.rowsAffected)))
 		err := pr.ConfirmEmail("testlink")
 
-		require.Equal(t, tc.retErr, err)
+		require.Equal(t, err, tc.retErr)
 	}
 }
 
@@ -164,7 +164,7 @@ func TestFindUserByEmailSuccess(t *testing.T) {
 
 	retUser, err := pr.FindUserByEmail(testUser.Email)
 
-	require.Equal(t, retUser, &inputUser)
+	require.Equal(t, &inputUser, retUser)
 	require.NoError(t, err)
 
 }
