@@ -20,7 +20,7 @@ services:
     it_test_todo:
         build:
             context: ./
-            dockerfile: Dockerfile-it-tests
+            dockerfile: Dockerfile
         environment:
             POSTGRES_PASSWORD: test
             POSTGRES_DB: todo

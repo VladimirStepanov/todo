@@ -1,6 +1,0 @@
-FROM golang:1.16-alpine
-
-WORKDIR /app
-RUN apk add --no-cache postgresql-client
-
-RUN go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@latest

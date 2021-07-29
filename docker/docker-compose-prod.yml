@@ -33,7 +33,7 @@ services:
             - todo_db
         build:
             context: ./
-            dockerfile: Dockerfile-prod
+            dockerfile: Dockerfile
         volumes:
             - ./../:/app
         ports:
