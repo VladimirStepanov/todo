@@ -14,6 +14,22 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+func (suite *TestingSuite) makeRequest(method, path string, input *bytes.Buffer) (int, []byte) {
+	req := httptest.NewRequest(method, path, input)
+	req.Header.Set("Content-Type", "application/json")
+	w := httptest.NewRecorder()
+	suite.router.ServeHTTP(w, req)
+
+	res := w.Result()
+
+	defer res.Body.Close()
+
+	data, err := ioutil.ReadAll(res.Body)
+	require.NoError(suite.T(), err)
+
+	return res.StatusCode, data
+}
+
 func (suite *TestingSuite) TestSignUp() {
 
 	tests := []struct {
@@ -120,4 +136,22 @@ func (suite *TestingSuite) TestEmailConfirmation() {
 			}
 		})
 	}
+}
+
+func (suite *TestingSuite) TestMaxLoggedIn() {
+
+	input := fmt.Sprintf(`{"email": "%s", "password": "%s"}`, maxLoggedInUser.Email, defaultPassword)
+
+	for i := 0; i < maxLoggenInCount; i++ {
+		code, _ := suite.makeRequest(http.MethodPost, "/auth/sign-in", bytes.NewBuffer([]byte(input)))
+		require.Equal(suite.T(), http.StatusOK, code)
+	}
+
+	code, data := suite.makeRequest(http.MethodPost, "/auth/sign-in", bytes.NewBuffer([]byte(input)))
+	require.Equal(suite.T(), http.StatusForbidden, code)
+	resp := handler.ErrorResponse{}
+	err := json.Unmarshal(data, &resp)
+	require.NoError(suite.T(), err)
+	require.Equal(suite.T(), resp.Status, "error")
+	require.Equal(suite.T(), models.ErrMaxLoggedIn.Error(), resp.Message)
 }
