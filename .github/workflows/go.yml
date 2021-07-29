@@ -53,7 +53,7 @@ jobs:
           POSTGRES_USER: test
           POSTGRES_PORT: 5432
           POSTGRES_HOST: localhost
-          REDIS_HOST: redis
+          REDIS_HOST: localhost
           REDIS_PORT: 6379
           CGO_ENABLED: 0
         run: | 
