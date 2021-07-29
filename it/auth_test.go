@@ -103,7 +103,7 @@ func (suite *TestingSuite) TestEmailConfirmation() {
 		},
 		{
 			"Unknown confirmation link",
-			"unknown-link",
+			unknownConfLink,
 			http.StatusNotFound,
 			"Page not found",
 		},
@@ -138,7 +138,7 @@ func (suite *TestingSuite) TestEmailConfirmation() {
 	}
 }
 
-func (suite *TestingSuite) TestMaxLoggedIn() {
+func (suite *TestingSuite) TestSignIn() {
 
 	input := fmt.Sprintf(`{"email": "%s", "password": "%s"}`, maxLoggedInUser.Email, defaultPassword)
 
@@ -147,11 +147,48 @@ func (suite *TestingSuite) TestMaxLoggedIn() {
 		require.Equal(suite.T(), http.StatusOK, code)
 	}
 
-	code, data := suite.makeRequest(http.MethodPost, "/auth/sign-in", bytes.NewBuffer([]byte(input)))
-	require.Equal(suite.T(), http.StatusForbidden, code)
-	resp := handler.ErrorResponse{}
-	err := json.Unmarshal(data, &resp)
-	require.NoError(suite.T(), err)
-	require.Equal(suite.T(), resp.Status, "error")
-	require.Equal(suite.T(), models.ErrMaxLoggedIn.Error(), resp.Message)
+	tests := []struct {
+		name   string
+		input  string
+		code   int
+		errMsg string
+	}{
+		{
+			name:   "Max logged in users",
+			input:  fmt.Sprintf(`{"email": "%s", "password": "%s"}`, maxLoggedInUser.Email, defaultPassword),
+			code:   http.StatusForbidden,
+			errMsg: models.ErrMaxLoggedIn.Error(),
+		},
+		{
+			name:   "Check ErrBadUser error",
+			input:  fmt.Sprintf(`{"email": "%s", "password": "%s"}`, "bad@user.com", defaultPassword),
+			code:   http.StatusNotFound,
+			errMsg: models.ErrBadUser.Error(),
+		},
+		{
+			name:   "Check ErrUserNotActivated error",
+			input:  fmt.Sprintf(`{"email": "%s", "password": "%s"}`, authNotConfirmedUser.Email, defaultPassword),
+			code:   http.StatusForbidden,
+			errMsg: models.ErrUserNotActivated.Error(),
+		},
+		{
+			name:   "Success auth",
+			input:  fmt.Sprintf(`{"email": "%s", "password": "%s"}`, authUser.Email, defaultPassword),
+			code:   http.StatusOK,
+			errMsg: "",
+		},
+	}
+
+	for _, tc := range tests {
+		code, data := suite.makeRequest(http.MethodPost, "/auth/sign-in", bytes.NewBuffer([]byte(tc.input)))
+		require.Equal(suite.T(), tc.code, code)
+		if tc.errMsg != "" && tc.code != http.StatusOK {
+			resp := handler.ErrorResponse{}
+			err := json.Unmarshal(data, &resp)
+			require.NoError(suite.T(), err)
+			require.Equal(suite.T(), "error", resp.Status)
+			require.Equal(suite.T(), tc.errMsg, resp.Message)
+
+		}
+	}
 }

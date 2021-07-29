@@ -30,27 +30,35 @@ type TestingSuite struct {
 var (
 	defaultPassword = "123456789"
 	defaultSalt     = "$2a$10$wHVm4AGd.uq.dR7Zk3VjhOJWLEt9WPXEqoCPx5AEzPtH31o7WiY92"
+	unknownConfLink = "unknown-link777"
 )
 
 var userForCreate = &models.User{
 	Email:         "alreadyexists@mail.ru",
-	Password:      defaultPassword,
+	Password:      defaultSalt,
 	IsActivated:   false,
 	ActivatedLink: "user_for_create",
 }
 
 var notConfirmedUser = &models.User{
 	Email:         "notconfirm@mail.ru",
-	Password:      defaultPassword,
+	Password:      defaultSalt,
 	IsActivated:   false,
 	ActivatedLink: "not_confirmed_user",
 }
 
 var confirmedUser = &models.User{
 	Email:         "confirmed@mail.ru",
-	Password:      defaultPassword,
+	Password:      defaultSalt,
 	IsActivated:   true,
 	ActivatedLink: "confirmed_user",
+}
+
+var authNotConfirmedUser = &models.User{
+	Email:         "notconfirmforauth@mail.ru",
+	Password:      defaultSalt,
+	IsActivated:   false,
+	ActivatedLink: "authNotConfirmedUser",
 }
 
 var authUser = &models.User{
@@ -73,6 +81,7 @@ var dataForInsert = []*models.User{
 	confirmedUser,
 	authUser,
 	maxLoggedInUser,
+	authNotConfirmedUser,
 }
 
 var (
