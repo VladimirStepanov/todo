@@ -54,28 +54,13 @@ func (suite *TestingSuite) TestSignUp() {
 
 	for _, tc := range tests {
 		suite.T().Run(tc.name, func(t *testing.T) {
-			req := httptest.NewRequest(http.MethodPost, "/auth/sign-up", bytes.NewBuffer([]byte(tc.data)))
-			req.Header.Set("Content-Type", "application/json")
-			w := httptest.NewRecorder()
-			suite.router.ServeHTTP(w, req)
-
-			res := w.Result()
-
-			defer res.Body.Close()
-			require.Equalf(
-				t, tc.code, res.StatusCode,
-				"Error! Expected code: %d, but got %d\n", tc.code, res.StatusCode,
-			)
-
-			data, err := ioutil.ReadAll(res.Body)
-
-			require.NoErrorf(t, err, "Error while ReadAll %v", err)
-
+			code, data := suite.makeRequest(http.MethodPost, "/auth/sign-up", bytes.NewBuffer([]byte(tc.data)))
+			require.Equal(t, tc.code, code)
 			if tc.errMsg != "" {
 				resp := handler.ErrorResponse{}
-				err = json.Unmarshal(data, &resp)
-				require.Equal(t, resp.Status, "error")
-				require.NoErrorf(t, err, "Error while Unmarshal %v", err)
+				err := json.Unmarshal(data, &resp)
+				require.NoError(t, err)
+				require.Equal(t, "error", resp.Status)
 				require.Equal(t, tc.errMsg, resp.Message)
 			}
 		})
@@ -111,28 +96,15 @@ func (suite *TestingSuite) TestEmailConfirmation() {
 
 	for _, tc := range tests {
 		suite.T().Run(tc.name, func(t *testing.T) {
-			req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/auth/confirm/%s", tc.link), nil)
-			w := httptest.NewRecorder()
-			suite.router.ServeHTTP(w, req)
-
-			res := w.Result()
-
-			defer res.Body.Close()
-			require.Equalf(
-				t, tc.code, res.StatusCode,
-				"Error! Expected code: %d, but got %d\n", tc.code, res.StatusCode,
-			)
-
-			data, err := ioutil.ReadAll(res.Body)
-
-			require.NoErrorf(t, err, "Error while ReadAll %v", err)
-
-			if tc.errMsg != "" {
+			code, data := suite.makeRequest(http.MethodGet, fmt.Sprintf("/auth/confirm/%s", tc.link), bytes.NewBuffer([]byte{}))
+			require.Equal(t, tc.code, code)
+			if tc.errMsg != "" && tc.code != http.StatusOK {
 				resp := handler.ErrorResponse{}
-				err = json.Unmarshal(data, &resp)
-				require.Equal(t, resp.Status, "error")
-				require.NoErrorf(t, err, "Error while Unmarshal %v", err)
+				err := json.Unmarshal(data, &resp)
+				require.NoError(t, err)
+				require.Equal(t, "error", resp.Status)
 				require.Equal(t, tc.errMsg, resp.Message)
+
 			}
 		})
 	}
@@ -180,15 +152,17 @@ func (suite *TestingSuite) TestSignIn() {
 	}
 
 	for _, tc := range tests {
-		code, data := suite.makeRequest(http.MethodPost, "/auth/sign-in", bytes.NewBuffer([]byte(tc.input)))
-		require.Equal(suite.T(), tc.code, code)
-		if tc.errMsg != "" && tc.code != http.StatusOK {
-			resp := handler.ErrorResponse{}
-			err := json.Unmarshal(data, &resp)
-			require.NoError(suite.T(), err)
-			require.Equal(suite.T(), "error", resp.Status)
-			require.Equal(suite.T(), tc.errMsg, resp.Message)
+		suite.T().Run(tc.name, func(t *testing.T) {
+			code, data := suite.makeRequest(http.MethodPost, "/auth/sign-in", bytes.NewBuffer([]byte(tc.input)))
+			require.Equal(t, tc.code, code)
+			if tc.errMsg != "" && tc.code != http.StatusOK {
+				resp := handler.ErrorResponse{}
+				err := json.Unmarshal(data, &resp)
+				require.NoError(t, err)
+				require.Equal(t, "error", resp.Status)
+				require.Equal(t, tc.errMsg, resp.Message)
 
-		}
+			}
+		})
 	}
 }
