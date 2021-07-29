@@ -1,6 +1,6 @@
 #!/bin/bash
 
 sh scripts/wait-postgres.sh
-sh scripts/migrate.sh "down -all"
-sh scripts/migrate.sh up
+go run cmd/migrate/migrate.go -direction down
+go run cmd/migrate/migrate.go -direction up
 go test -v ./it
