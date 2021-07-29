@@ -14,6 +14,9 @@ services:
             - "5434:5434"
         command: -p 5434
     
+    it_tokendb_test:
+        image: "redis:alpine"
+    
     it_test_todo:
         build:
             context: ./
@@ -25,6 +28,8 @@ services:
             POSTGRES_PORT: 5434
             MIGRATE_DB_HOST: it_tests_todo_db
             POSTGRES_HOST: it_tests_todo_db
+            REDIS_HOST: it_tokendb_test
+            REDIS_PORT: 6379
             CGO_ENABLED: 0
         volumes:
             - ./../:/app
