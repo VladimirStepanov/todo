@@ -20,6 +20,7 @@ type MailService interface {
 
 type TokenService interface {
 	NewTokenPair(userID int64) (*TokenDetails, error)
+	Refresh(refreshToken string) (*TokenDetails, error)
 }
 
 type TokenRepository interface {

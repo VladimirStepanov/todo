@@ -34,3 +34,26 @@ func (_m *TokenService) NewTokenPair(userID int64) (*models.TokenDetails, error)
 
 	return r0, r1
 }
+
+// Refresh provides a mock function with given fields: refreshToken
+func (_m *TokenService) Refresh(refreshToken string) (*models.TokenDetails, error) {
+	ret := _m.Called(refreshToken)
+
+	var r0 *models.TokenDetails
+	if rf, ok := ret.Get(0).(func(string) *models.TokenDetails); ok {
+		r0 = rf(refreshToken)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*models.TokenDetails)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(string) error); ok {
+		r1 = rf(refreshToken)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
