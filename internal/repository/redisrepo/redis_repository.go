@@ -72,3 +72,10 @@ func (r *RedisRepository) Count(pattern string) (int, error) {
 	}
 	return len(res), nil
 }
+
+func (r *RedisRepository) Delete(keys ...string) error {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*3)
+	defer cancel()
+
+	return r.client.Del(ctx, keys...).Err()
+}

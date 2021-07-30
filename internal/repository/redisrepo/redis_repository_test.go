@@ -128,3 +128,36 @@ func TestCount(t *testing.T) {
 		})
 	}
 }
+
+func TestDelete(t *testing.T) {
+	tests := []struct {
+		name    string
+		setMock func(m redismock.ClientMock)
+		expErr  error
+	}{
+		{
+			name: "Some error",
+			setMock: func(m redismock.ClientMock) {
+				m.ExpectDel("hello").SetErr(ErrUnknown)
+			},
+			expErr: ErrUnknown,
+		},
+		{
+			name: "Success delete",
+			setMock: func(m redismock.ClientMock) {
+				m.ExpectDel("hello").SetVal(1)
+			},
+			expErr: nil,
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			db, mock := redismock.NewClientMock()
+			tc.setMock(mock)
+			rr := NewRedisRepository(db)
+			err := rr.Delete("hello")
+			require.Equal(t, tc.expErr, err)
+		})
+	}
+}

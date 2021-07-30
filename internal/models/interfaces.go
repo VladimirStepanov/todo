@@ -26,4 +26,5 @@ type TokenRepository interface {
 	Get(key string) (bool, error)
 	SetTokens(accessKey string, accessExp time.Duration, refreshKey string, refreshExp time.Duration) error
 	Count(pattern string) (int, error)
+	Delete(keys ...string) error
 }

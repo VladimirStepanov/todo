@@ -34,6 +34,26 @@ func (_m *TokenRepository) Count(pattern string) (int, error) {
 	return r0, r1
 }
 
+// Delete provides a mock function with given fields: keys
+func (_m *TokenRepository) Delete(keys ...string) error {
+	_va := make([]interface{}, len(keys))
+	for _i := range keys {
+		_va[_i] = keys[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(...string) error); ok {
+		r0 = rf(keys...)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
 // Get provides a mock function with given fields: key
 func (_m *TokenRepository) Get(key string) (bool, error) {
 	ret := _m.Called(key)
