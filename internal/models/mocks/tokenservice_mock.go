@@ -12,6 +12,20 @@ type TokenService struct {
 	mock.Mock
 }
 
+// Logout provides a mock function with given fields: userID, userUUID
+func (_m *TokenService) Logout(userID int64, userUUID string) error {
+	ret := _m.Called(userID, userUUID)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(int64, string) error); ok {
+		r0 = rf(userID, userUUID)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
 // NewTokenPair provides a mock function with given fields: userID
 func (_m *TokenService) NewTokenPair(userID int64) (*models.TokenDetails, error) {
 	ret := _m.Called(userID)

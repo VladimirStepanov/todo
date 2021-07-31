@@ -287,3 +287,32 @@ func TestVerify(t *testing.T) {
 		})
 	}
 }
+
+func TestLogout(t *testing.T) {
+	tests := []struct {
+		name      string
+		delRetErr error
+		expErr    error
+	}{
+		{
+			name:      "Delete return error",
+			delRetErr: ErrSome,
+			expErr:    ErrSome,
+		},
+		{
+			name:      "Success logout",
+			delRetErr: nil,
+			expErr:    nil,
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			repoMock := new(mocks.TokenRepository)
+			repoMock.On("Delete", mock.Anything, mock.Anything).Return(tc.delRetErr)
+			ts := NewTokenService(accessKey, refreshKey, maxLoggenIn, repoMock)
+			err := ts.Logout(1, "hello")
+			require.Equal(t, tc.expErr, err)
+		})
+	}
+}

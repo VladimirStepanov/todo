@@ -168,3 +168,10 @@ func (ts *TokenService) Verify(token string) (int64, string, error) {
 
 	return int64(claims["user_id"].(float64)), claims["uuid"].(string), nil
 }
+
+func (ts *TokenService) Logout(userID int64, userUUID string) error {
+	accessRedisKey := fmt.Sprintf("a:%d:%s", userID, userUUID)
+	refreshRedisKey := fmt.Sprintf("r:%d:%s", userID, userUUID)
+
+	return ts.repo.Delete(refreshRedisKey, accessRedisKey)
+}

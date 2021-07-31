@@ -22,6 +22,7 @@ type TokenService interface {
 	NewTokenPair(userID int64) (*TokenDetails, error)
 	Refresh(refreshToken string) (*TokenDetails, error)
 	Verify(token string) (int64, string, error)
+	Logout(userID int64, userUUID string) error
 }
 
 type TokenRepository interface {
