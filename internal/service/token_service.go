@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/VladimirStepanov/todo-app/internal/models"
-	"github.com/dgrijalva/jwt-go"
+	"github.com/golang-jwt/jwt"
 	"github.com/google/uuid"
 )
 
@@ -14,6 +14,18 @@ type TokenService struct {
 	RefreshKey  string
 	MaxLoggedIn int
 	repo        models.TokenRepository
+}
+
+func GenerateToken(uuid string, uID int64, iat, exp int64, key string) (string, error) {
+	claims := jwt.MapClaims{}
+	claims["uuid"] = uuid
+	claims["user_id"] = uID
+	claims["exp"] = exp
+	claims["iat"] = iat
+
+	rt := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+
+	return rt.SignedString([]byte(key))
 }
 
 func NewTokenService(accessKey, refreshKey string, maxLoggedIn int, repo models.TokenRepository) models.TokenService {
@@ -34,14 +46,7 @@ func (ts *TokenService) generatePair(userID int64) (*models.TokenDetails, error)
 	res.AccessET = time.Now().Add(time.Minute * 15).Unix()
 	res.AccessIAT = time.Now().Unix()
 
-	atClaims := jwt.MapClaims{}
-	atClaims["uuid"] = res.UUID
-	atClaims["user_id"] = userID
-	atClaims["exp"] = res.AccessET
-	atClaims["iat"] = res.AccessIAT
-
-	at := jwt.NewWithClaims(jwt.SigningMethodHS256, atClaims)
-	res.AccessToken, err = at.SignedString([]byte(ts.AccessKey))
+	res.AccessToken, err = GenerateToken(res.UUID, userID, res.AccessIAT, res.AccessET, ts.AccessKey)
 	if err != nil {
 		return nil, err
 	}
@@ -49,14 +54,7 @@ func (ts *TokenService) generatePair(userID int64) (*models.TokenDetails, error)
 	res.RefreshET = time.Now().Add(time.Hour * 24 * 7).Unix()
 	res.RefreshIAT = time.Now().Unix()
 
-	rtClaims := jwt.MapClaims{}
-	rtClaims["uuid"] = res.UUID
-	rtClaims["user_id"] = userID
-	rtClaims["exp"] = res.RefreshET
-	rtClaims["iat"] = res.RefreshIAT
-	rt := jwt.NewWithClaims(jwt.SigningMethodHS256, rtClaims)
-
-	res.RefreshToken, err = rt.SignedString([]byte(ts.RefreshKey))
+	res.RefreshToken, err = GenerateToken(res.UUID, userID, res.RefreshIAT, res.RefreshET, ts.RefreshKey)
 	if err != nil {
 		return nil, err
 	}
@@ -99,4 +97,52 @@ func (ts *TokenService) NewTokenPair(userID int64) (*models.TokenDetails, error)
 		return nil, err
 	}
 	return td, err
+}
+
+func (ts *TokenService) getClaims(tokenString string) (jwt.MapClaims, error) {
+	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, models.ErrBadToken
+		}
+		return []byte(ts.RefreshKey), nil
+	})
+
+	if err != nil {
+		if e, ok := err.(*jwt.ValidationError); ok {
+			if e.Errors == jwt.ValidationErrorExpired {
+				return nil, models.ErrTokenExpired
+			}
+		}
+		return nil, models.ErrBadToken
+	}
+
+	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
+		return claims, nil
+	} else {
+		return nil, fmt.Errorf("can't convert token claims to standart claim")
+	}
+}
+
+func (ts *TokenService) Refresh(refreshToken string) (*models.TokenDetails, error) {
+	claims, err := ts.getClaims(refreshToken)
+
+	if err != nil {
+		return nil, err
+	}
+
+	refreshRedisKey := fmt.Sprintf("r:%d:%s", int64(claims["user_id"].(float64)), claims["uuid"].(string))
+	accessRedisKey := fmt.Sprintf("a:%d:%s", int64(claims["user_id"].(float64)), claims["uuid"].(string))
+	val, err := ts.repo.Get(refreshRedisKey)
+
+	if err != nil {
+		return nil, err
+	} else if !val {
+		return nil, models.ErrUserUnauthorized
+	}
+
+	err = ts.repo.Delete(refreshRedisKey, accessRedisKey)
+	if err != nil {
+		return nil, err
+	}
+	return ts.NewTokenPair(int64(claims["user_id"].(float64)))
 }
