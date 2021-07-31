@@ -3,11 +3,10 @@ package handler
 import (
 	"bytes"
 	"encoding/json"
-	"io/ioutil"
 	"net/http"
-	"net/http/httptest"
 	"testing"
 
+	"github.com/VladimirStepanov/todo-app/internal/helpers"
 	"github.com/VladimirStepanov/todo-app/internal/models"
 	"github.com/VladimirStepanov/todo-app/internal/models/mocks"
 	"github.com/gin-gonic/gin"
@@ -97,21 +96,16 @@ func TestSignIn(t *testing.T) {
 
 			handler := New(usObj, nil, tsObj, getTestLogger())
 			r := handler.InitRoutes(gin.TestMode)
-			req := httptest.NewRequest(http.MethodPost, "/auth/sign-in", bytes.NewBuffer([]byte(reqData)))
-			req.Header.Set("Content-Type", "application/json")
-			w := httptest.NewRecorder()
-			r.ServeHTTP(w, req)
-
-			res := w.Result()
-
-			defer res.Body.Close()
-
-			require.Equal(t, tc.code, res.StatusCode)
+			code, data := helpers.MakeRequest(
+				r,
+				t,
+				http.MethodPost,
+				"/auth/sign-in",
+				bytes.NewBuffer([]byte(reqData)),
+			)
+			require.Equal(t, tc.code, code)
 			actResp := map[string]interface{}{}
-
-			data, err := ioutil.ReadAll(res.Body)
-			require.NoError(t, err)
-			err = json.Unmarshal(data, &actResp)
+			err := json.Unmarshal(data, &actResp)
 			require.NoError(t, err)
 			if tc.code != 200 {
 				require.Equal(t, "error", actResp["status"])

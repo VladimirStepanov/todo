@@ -1,11 +1,12 @@
 package handler
 
 import (
+	"bytes"
 	"fmt"
 	"net/http"
-	"net/http/httptest"
 	"testing"
 
+	"github.com/VladimirStepanov/todo-app/internal/helpers"
 	"github.com/VladimirStepanov/todo-app/internal/models"
 	"github.com/VladimirStepanov/todo-app/internal/models/mocks"
 	"github.com/gin-gonic/gin"
@@ -32,16 +33,16 @@ func TestConfirmHandler(t *testing.T) {
 			handler := New(usObj, nil, nil, getTestLogger())
 
 			r := handler.InitRoutes(gin.TestMode)
-			req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/auth/confirm/%s", tc.link), nil)
 
-			w := httptest.NewRecorder()
-			r.ServeHTTP(w, req)
+			code, _ := helpers.MakeRequest(
+				r,
+				t,
+				http.MethodGet,
+				fmt.Sprintf("/auth/confirm/%s", tc.link),
+				bytes.NewBuffer([]byte{}),
+			)
 
-			res := w.Result()
-
-			defer res.Body.Close()
-
-			require.Equal(t, tc.code, res.StatusCode)
+			require.Equal(t, tc.code, code)
 		})
 	}
 }

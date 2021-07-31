@@ -12,6 +12,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/VladimirStepanov/todo-app/internal/helpers"
 	"github.com/VladimirStepanov/todo-app/internal/models"
 	"github.com/VladimirStepanov/todo-app/internal/models/mocks"
 	"github.com/gin-gonic/gin"
@@ -28,16 +29,15 @@ func TestSendMailReturnForSignUp(t *testing.T) {
 
 	handler := New(usObj, msObj, nil, getTestLogger())
 	r := handler.InitRoutes(gin.TestMode)
-	req := httptest.NewRequest(http.MethodPost, "/auth/sign-up", bytes.NewBuffer([]byte(reqData)))
-	req.Header.Set("Content-Type", "application/json")
-	w := httptest.NewRecorder()
-	r.ServeHTTP(w, req)
+	code, _ := helpers.MakeRequest(
+		r,
+		t,
+		http.MethodPost,
+		"/auth/sign-up",
+		bytes.NewBuffer([]byte(reqData)),
+	)
 
-	res := w.Result()
-
-	defer res.Body.Close()
-
-	require.Equal(t, http.StatusInternalServerError, res.StatusCode)
+	require.Equal(t, http.StatusInternalServerError, code)
 	usObj.AssertExpectations(t)
 }
 
@@ -61,16 +61,15 @@ func TestCreateErrorForSignUp(t *testing.T) {
 
 			handler := New(usObj, msObj, nil, getTestLogger())
 			r := handler.InitRoutes(gin.TestMode)
-			req := httptest.NewRequest(http.MethodPost, "/auth/sign-up", bytes.NewBuffer([]byte(reqData)))
-			req.Header.Set("Content-Type", "application/json")
-			w := httptest.NewRecorder()
-			r.ServeHTTP(w, req)
+			code, _ := helpers.MakeRequest(
+				r,
+				t,
+				http.MethodPost,
+				"/auth/sign-up",
+				bytes.NewBuffer([]byte(reqData)),
+			)
 
-			res := w.Result()
-
-			defer res.Body.Close()
-
-			require.Equal(t, tc.code, res.StatusCode)
+			require.Equal(t, tc.code, code)
 			usObj.AssertExpectations(t)
 		})
 	}
@@ -105,10 +104,8 @@ func TestBadContentType(t *testing.T) {
 
 	require.NoError(t, err)
 	err = json.Unmarshal(data, &actResp)
-	if err != nil {
-		t.Fatal(err)
-	}
-	require.True(t, reflect.DeepEqual(expResp, actResp), "Error! expResp != actResp")
+	require.NoError(t, err)
+	require.True(t, reflect.DeepEqual(expResp, actResp))
 
 	// usObj.AssertExpectations(t)
 }
@@ -161,33 +158,23 @@ func TestSignUpInput(t *testing.T) {
 
 			handler := New(usObj, msObj, nil, getTestLogger())
 			r := handler.InitRoutes(gin.TestMode)
-			req := httptest.NewRequest(http.MethodPost, "/auth/sign-up", bytes.NewBuffer([]byte(tc.data)))
-			req.Header.Set("Content-Type", "application/json")
-			w := httptest.NewRecorder()
-			r.ServeHTTP(w, req)
+			code, data := helpers.MakeRequest(
+				r,
+				t,
+				http.MethodPost,
+				"/auth/sign-up",
+				bytes.NewBuffer([]byte(tc.data)),
+			)
 
-			res := w.Result()
-
-			defer res.Body.Close()
-
-			require.Equal(t, tc.code, res.StatusCode)
+			require.Equal(t, tc.code, code)
 
 			if tc.expArg != nil {
 				resp := BindDataError{}
+				err := json.Unmarshal(data, &resp)
 
-				data, err := ioutil.ReadAll(res.Body)
+				require.NoError(t, err)
 
-				require.NoErrorf(t, err, "Error while ReadAll %v", err)
-
-				err = json.Unmarshal(data, &resp)
-
-				if err != nil {
-					t.Fatal(err)
-				}
-
-				require.True(
-					t, reflect.DeepEqual(tc.expArg, &resp.InvalidArgs[0]), "Error! % != InvalidArgs[0]",
-				)
+				require.True(t, reflect.DeepEqual(tc.expArg, &resp.InvalidArgs[0]))
 			}
 
 			if tc.code == http.StatusOK {
