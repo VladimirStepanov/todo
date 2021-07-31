@@ -47,8 +47,8 @@ func (h *Handler) signIn(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"access_token":  td.AccessToken,
-		"refresh_token": td.RefreshToken,
+	c.JSON(http.StatusOK, &TokensResponse{
+		AccessToken:  td.AccessToken,
+		RefreshToken: td.RefreshToken,
 	})
 }

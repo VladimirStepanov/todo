@@ -6,6 +6,11 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+type TokensResponse struct {
+	AccessToken  string `json:"access_token"`
+	RefreshToken string `json:"refresh_token"`
+}
+
 type ErrorResponse struct {
 	Status  string `json:"status"`
 	Message string `json:"message"`
