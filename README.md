@@ -11,6 +11,7 @@ List of used libraries:
 * [testify](https://github.com/stretchr/testify) for testing (mock, require, suite)
 * [go-sqlmock](https://github.com/DATA-DOG/go-sqlmock) for database mocking
 * [redis-mock](https://github.com/go-redis/redismock) for redis mocking
+* [golang-jwt/jwt](https://github.com/golang-jwt/jwt) for JWT auth
 
 ## Startup configuration [file .env in root]
 
@@ -126,6 +127,29 @@ Params (json):
 curl -L -X POST 'localhost:8080/auth/sign-in' -H 'Content-Type: application/json' --data-raw '{
     "email": "test1234test@mmail.com",
     "password": "1234567891"
+}'
+```
+
+#### Response
+
+```json
+{
+    "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2Mjc1NjgyMjAsImlhdCI6MTYyNzU2NzMyMCwidXNlcl9pZCI6MywidXVpZCI6ImFlZTg3MThkLWRkZjYtNGYwMy05OGM3LTg2ZmE1NGI2MDQyNCJ9.NukptPP9lLLqz29_M0d-lUZeLFk7Tetze3vMhyFrCfQ",
+    "refresh_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2MjgxNzIxMjAsImlhdCI6MTYyNzU2NzMyMCwidXNlcl9pZCI6MywidXVpZCI6ImFlZTg3MThkLWRkZjYtNGYwMy05OGM3LTg2ZmE1NGI2MDQyNCJ9.YqimvrtWcx7Vq0ULLFW3H3Lhcov1mZ-b3Kjr9w0x-z4"
+}
+```
+
+## Refresh JWT token
+
+`POST /auth/refresh`
+
+Params (json):
+* refresh_token [string]
+
+#### Request
+```bash
+curl -L -X POST 'localhost:8080/auth/sign-in' -H 'Content-Type: application/json' --data-raw '{
+    "refresh_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2MjgzMjg0OTEsImlhdCI6MTYyNzcyMzY5MSwidXNlcl9pZCI6MywidXVpZCI6Ijc4YjE2NWE3LWI5MWQtNDM5ZS04MTI4LTBiNmM0ODk3YzNlZSJ9.MRrBSA-T5fS7t249K6-4k70WbUS8--9ZBdA44RybakM"
 }'
 ```
 
