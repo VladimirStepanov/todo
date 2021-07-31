@@ -214,3 +214,76 @@ func TestRefresh(t *testing.T) {
 		})
 	}
 }
+
+func TestVerify(t *testing.T) {
+	expiredToken, err := GenerateToken(testUUID, userID, 100, 103, accessKey)
+	require.NoError(t, err)
+	actualToken, err := GenerateToken(
+		testUUID, userID,
+		time.Now().Unix(),
+		time.Now().Add(time.Hour).Unix(), accessKey,
+	)
+
+	require.NoError(t, err)
+	tests := []struct {
+		name      string
+		token     string
+		getRetVal bool
+		getRetErr error
+		expErr    error
+	}{
+		{
+			name:      "Bad token",
+			token:     "bad.bad.bad",
+			getRetVal: false,
+			getRetErr: nil,
+			expErr:    models.ErrBadToken,
+		},
+		{
+			name:      "Expired token",
+			token:     expiredToken,
+			getRetVal: false,
+			getRetErr: nil,
+			expErr:    models.ErrTokenExpired,
+		},
+		{
+			name:      "Get unknown error",
+			token:     actualToken,
+			getRetVal: false,
+			getRetErr: ErrSome,
+			expErr:    ErrSome,
+		},
+		{
+			name:      "Get return false",
+			token:     actualToken,
+			getRetVal: false,
+			getRetErr: nil,
+			expErr:    models.ErrUserUnauthorized,
+		},
+		{
+			name:      "Success refresh",
+			token:     actualToken,
+			getRetVal: true,
+			getRetErr: nil,
+			expErr:    nil,
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			repoMock := new(mocks.TokenRepository)
+			repoMock.On("Get", mock.Anything).Return(tc.getRetVal, tc.getRetErr)
+			ts := NewTokenService(accessKey, refreshKey, maxLoggenIn, repoMock)
+
+			id, uuid, err := ts.Verify(tc.token)
+
+			require.Equal(t, tc.expErr, err)
+
+			if tc.expErr == nil {
+				require.Equal(t, userID, id)
+				require.Equal(t, testUUID, uuid)
+			}
+
+		})
+	}
+}

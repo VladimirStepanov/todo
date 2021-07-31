@@ -57,3 +57,31 @@ func (_m *TokenService) Refresh(refreshToken string) (*models.TokenDetails, erro
 
 	return r0, r1
 }
+
+// Verify provides a mock function with given fields: token
+func (_m *TokenService) Verify(token string) (int64, string, error) {
+	ret := _m.Called(token)
+
+	var r0 int64
+	if rf, ok := ret.Get(0).(func(string) int64); ok {
+		r0 = rf(token)
+	} else {
+		r0 = ret.Get(0).(int64)
+	}
+
+	var r1 string
+	if rf, ok := ret.Get(1).(func(string) string); ok {
+		r1 = rf(token)
+	} else {
+		r1 = ret.Get(1).(string)
+	}
+
+	var r2 error
+	if rf, ok := ret.Get(2).(func(string) error); ok {
+		r2 = rf(token)
+	} else {
+		r2 = ret.Error(2)
+	}
+
+	return r0, r1, r2
+}

@@ -158,3 +158,13 @@ func (ts *TokenService) Refresh(refreshToken string) (*models.TokenDetails, erro
 	}
 	return ts.NewTokenPair(int64(claims["user_id"].(float64)))
 }
+
+func (ts *TokenService) Verify(token string) (int64, string, error) {
+	claims, err := ts.verify(token, ts.AccessKey, "a")
+
+	if err != nil {
+		return 0, "", err
+	}
+
+	return int64(claims["user_id"].(float64)), claims["uuid"].(string), nil
+}
