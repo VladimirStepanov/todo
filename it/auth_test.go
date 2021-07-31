@@ -45,6 +45,7 @@ func (suite *TestingSuite) TestSignUp() {
 				http.MethodPost,
 				"/auth/sign-up",
 				bytes.NewBuffer([]byte(tc.data)),
+				nil,
 			)
 			require.Equal(t, tc.code, code)
 			if tc.errMsg != "" {
@@ -93,6 +94,7 @@ func (suite *TestingSuite) TestEmailConfirmation() {
 				http.MethodGet,
 				fmt.Sprintf("/auth/confirm/%s", tc.link),
 				bytes.NewBuffer([]byte{}),
+				nil,
 			)
 			require.Equal(t, tc.code, code)
 			if tc.errMsg != "" && tc.code != http.StatusOK {
@@ -118,6 +120,7 @@ func (suite *TestingSuite) TestSignIn() {
 			http.MethodPost,
 			"/auth/sign-in",
 			bytes.NewBuffer([]byte(input)),
+			nil,
 		)
 		require.Equal(suite.T(), http.StatusOK, code)
 	}
@@ -162,6 +165,7 @@ func (suite *TestingSuite) TestSignIn() {
 				http.MethodPost,
 				"/auth/sign-in",
 				bytes.NewBuffer([]byte(tc.input)),
+				nil,
 			)
 			require.Equal(t, tc.code, code)
 			if tc.errMsg != "" && tc.code != http.StatusOK {
@@ -185,6 +189,7 @@ func (suite *TestingSuite) TestRefresh() {
 		http.MethodPost,
 		"/auth/sign-in",
 		bytes.NewBuffer([]byte(siginInput)),
+		nil,
 	)
 	require.Equal(suite.T(), http.StatusOK, code)
 
@@ -248,6 +253,7 @@ func (suite *TestingSuite) TestRefresh() {
 				http.MethodPost,
 				"/auth/refresh",
 				bytes.NewBuffer([]byte(tc.input())),
+				nil,
 			)
 			require.Equal(t, tc.code, code)
 			if tc.errMsg != "" && tc.code != http.StatusOK {

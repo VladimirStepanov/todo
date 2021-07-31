@@ -40,6 +40,7 @@ func TestConfirmHandler(t *testing.T) {
 				http.MethodGet,
 				fmt.Sprintf("/auth/confirm/%s", tc.link),
 				bytes.NewBuffer([]byte{}),
+				nil,
 			)
 
 			require.Equal(t, tc.code, code)

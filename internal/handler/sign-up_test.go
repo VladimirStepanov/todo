@@ -35,6 +35,7 @@ func TestSendMailReturnForSignUp(t *testing.T) {
 		http.MethodPost,
 		"/auth/sign-up",
 		bytes.NewBuffer([]byte(reqData)),
+		nil,
 	)
 
 	require.Equal(t, http.StatusInternalServerError, code)
@@ -67,6 +68,7 @@ func TestCreateErrorForSignUp(t *testing.T) {
 				http.MethodPost,
 				"/auth/sign-up",
 				bytes.NewBuffer([]byte(reqData)),
+				nil,
 			)
 
 			require.Equal(t, tc.code, code)
@@ -164,6 +166,7 @@ func TestSignUpInput(t *testing.T) {
 				http.MethodPost,
 				"/auth/sign-up",
 				bytes.NewBuffer([]byte(tc.data)),
+				nil,
 			)
 
 			require.Equal(t, tc.code, code)

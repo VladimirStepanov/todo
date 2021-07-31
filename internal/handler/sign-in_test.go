@@ -102,6 +102,7 @@ func TestSignIn(t *testing.T) {
 				http.MethodPost,
 				"/auth/sign-in",
 				bytes.NewBuffer([]byte(reqData)),
+				nil,
 			)
 			require.Equal(t, tc.code, code)
 			actResp := map[string]interface{}{}
