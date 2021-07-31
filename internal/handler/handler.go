@@ -24,7 +24,7 @@ func (h *Handler) InitRoutes(mode string) http.Handler {
 		auth.POST("/sign-in", h.signIn)
 		auth.GET("/confirm/:link", h.confirm)
 		auth.POST("/sign-up", h.signUp)
-		auth.GET("/refresh", h.refreshToken)
+		auth.POST("/refresh", h.refreshToken)
 	}
 
 	return r
