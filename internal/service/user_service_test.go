@@ -10,9 +10,11 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-var testEmail = "test@test.ru"
-var testPassword = "123456789"
-var ErrSome = errors.New("unknown error")
+var (
+	testEmail    = "test@test.ru"
+	testPassword = "123456789"
+	ErrSome      = errors.New("unknown error")
+)
 
 var testUser = &models.User{
 	ID:            1,
