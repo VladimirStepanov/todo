@@ -6,10 +6,12 @@ import (
 	"fmt"
 	"net/http"
 	"testing"
+	"time"
 
 	"github.com/VladimirStepanov/todo-app/internal/handler"
 	"github.com/VladimirStepanov/todo-app/internal/helpers"
 	"github.com/VladimirStepanov/todo-app/internal/models"
+	"github.com/VladimirStepanov/todo-app/internal/service"
 	"github.com/stretchr/testify/require"
 )
 
@@ -160,6 +162,92 @@ func (suite *TestingSuite) TestSignIn() {
 				http.MethodPost,
 				"/auth/sign-in",
 				bytes.NewBuffer([]byte(tc.input)),
+			)
+			require.Equal(t, tc.code, code)
+			if tc.errMsg != "" && tc.code != http.StatusOK {
+				resp := handler.ErrorResponse{}
+				err := json.Unmarshal(data, &resp)
+				require.NoError(t, err)
+				require.Equal(t, "error", resp.Status)
+				require.Equal(t, tc.errMsg, resp.Message)
+			}
+		})
+	}
+}
+
+func (suite *TestingSuite) TestRefresh() {
+	inputF := `{"refresh_token": "%s"}`
+
+	siginInput := fmt.Sprintf(`{"email": "%s", "password": "%s"}`, authUser.Email, defaultPassword)
+	code, data := helpers.MakeRequest(
+		suite.router,
+		suite.T(),
+		http.MethodPost,
+		"/auth/sign-in",
+		bytes.NewBuffer([]byte(siginInput)),
+	)
+	require.Equal(suite.T(), http.StatusOK, code)
+
+	authResp := &handler.TokensResponse{}
+	err := json.Unmarshal(data, authResp)
+	require.NoError(suite.T(), err)
+
+	tests := []struct {
+		name   string
+		input  func() string
+		code   int
+		errMsg string
+	}{
+		{
+			name: "Bad token error",
+			input: func() string {
+				return fmt.Sprintf(inputF, "bad.bad.bad")
+			},
+			code:   http.StatusForbidden,
+			errMsg: models.ErrBadToken.Error(),
+		},
+		{
+			name: "Expired token error",
+			input: func() string {
+				token, err := service.GenerateToken(testUUID, authUser.ID, 100, 103, refreshKey)
+				require.NoError(suite.T(), err)
+				return fmt.Sprintf(inputF, token)
+			},
+			code:   http.StatusUnauthorized,
+			errMsg: models.ErrTokenExpired.Error(),
+		},
+		{
+			name: "User unauthorized",
+			input: func() string {
+				token, err := service.GenerateToken(
+					testUUID, notConfirmedUser.ID,
+					time.Now().Unix(),
+					time.Now().Add(time.Hour).Unix(), refreshKey,
+				)
+				require.NoError(suite.T(), err)
+				return fmt.Sprintf(inputF, token)
+			},
+			code:   http.StatusUnauthorized,
+			errMsg: models.ErrUserUnauthorized.Error(),
+		},
+		{
+			name: "Success refresh",
+			input: func() string {
+				return fmt.Sprintf(inputF, authResp.RefreshToken)
+			},
+			code:   http.StatusOK,
+			errMsg: "",
+		},
+	}
+
+	for _, tc := range tests {
+		suite.T().Run(tc.name, func(t *testing.T) {
+			code, data := helpers.MakeRequest(
+				suite.router,
+				suite.T(),
+				http.MethodPost,
+				"/auth/refresh",
+				bytes.NewBuffer([]byte(tc.input())),
 			)
 			require.Equal(t, tc.code, code)
 			if tc.errMsg != "" && tc.code != http.StatusOK {

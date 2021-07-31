@@ -87,7 +87,8 @@ var dataForInsert = []*models.User{
 var (
 	accessKey        = "accessKey"
 	refreshKey       = "refreshKey"
-	maxLoggenInCount = 3
+	maxLoggenInCount = 10
+	testUUID         = "60a1cc8e-f741-45bc-a794-1ac655790c3b"
 )
 
 func initDb(t *testing.T, db *sqlx.DB) {
