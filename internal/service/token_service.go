@@ -123,22 +123,34 @@ func (ts *TokenService) getClaims(tokenString, key string) (jwt.MapClaims, error
 	}
 }
 
-func (ts *TokenService) Refresh(refreshToken string) (*models.TokenDetails, error) {
-	claims, err := ts.getClaims(refreshToken, ts.RefreshKey)
+func (ts *TokenService) verify(token, key, prefix string) (jwt.MapClaims, error) {
+	claims, err := ts.getClaims(token, key)
 
 	if err != nil {
 		return nil, err
 	}
 
-	refreshRedisKey := fmt.Sprintf("r:%d:%s", int64(claims["user_id"].(float64)), claims["uuid"].(string))
-	accessRedisKey := fmt.Sprintf("a:%d:%s", int64(claims["user_id"].(float64)), claims["uuid"].(string))
-	val, err := ts.repo.Get(refreshRedisKey)
+	redisKey := fmt.Sprintf("%s:%d:%s", prefix, int64(claims["user_id"].(float64)), claims["uuid"].(string))
+	val, err := ts.repo.Get(redisKey)
 
 	if err != nil {
 		return nil, err
 	} else if !val {
 		return nil, models.ErrUserUnauthorized
 	}
+
+	return claims, nil
+}
+
+func (ts *TokenService) Refresh(refreshToken string) (*models.TokenDetails, error) {
+	claims, err := ts.verify(refreshToken, ts.RefreshKey, "r")
+
+	if err != nil {
+		return nil, err
+	}
+
+	accessRedisKey := fmt.Sprintf("a:%d:%s", int64(claims["user_id"].(float64)), claims["uuid"].(string))
+	refreshRedisKey := fmt.Sprintf("r:%d:%s", int64(claims["user_id"].(float64)), claims["uuid"].(string))
 
 	err = ts.repo.Delete(refreshRedisKey, accessRedisKey)
 	if err != nil {
