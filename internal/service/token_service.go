@@ -99,12 +99,12 @@ func (ts *TokenService) NewTokenPair(userID int64) (*models.TokenDetails, error)
 	return td, err
 }
 
-func (ts *TokenService) getClaims(tokenString string) (jwt.MapClaims, error) {
+func (ts *TokenService) getClaims(tokenString, key string) (jwt.MapClaims, error) {
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, models.ErrBadToken
 		}
-		return []byte(ts.RefreshKey), nil
+		return []byte(key), nil
 	})
 
 	if err != nil {
@@ -124,7 +124,7 @@ func (ts *TokenService) getClaims(tokenString string) (jwt.MapClaims, error) {
 }
 
 func (ts *TokenService) Refresh(refreshToken string) (*models.TokenDetails, error) {
-	claims, err := ts.getClaims(refreshToken)
+	claims, err := ts.getClaims(refreshToken, ts.RefreshKey)
 
 	if err != nil {
 		return nil, err
