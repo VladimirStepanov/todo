@@ -29,6 +29,7 @@ func TestCreate(t *testing.T) {
 	tests := []struct {
 		name    string
 		setMock func(m sqlmock.Sqlmock, e error)
+		retErr  error
 		expErr  error
 		expID   int64
 	}{
@@ -37,6 +38,7 @@ func TestCreate(t *testing.T) {
 			setMock: func(m sqlmock.Sqlmock, e error) {
 				m.ExpectBegin().WillReturnError(e)
 			},
+			retErr: ErrUnknown,
 			expErr: ErrUnknown,
 			expID:  0,
 		},
@@ -47,6 +49,7 @@ func TestCreate(t *testing.T) {
 				m.ExpectQuery("INSERT INTO lists").WithArgs("title", "description").WillReturnError(e)
 				m.ExpectRollback()
 			},
+			retErr: ErrUnknown,
 			expErr: ErrUnknown,
 			expID:  0,
 		},
@@ -59,6 +62,7 @@ func TestCreate(t *testing.T) {
 				m.ExpectExec("INSERT INTO users_lists").WithArgs(1, 1, true).WillReturnError(e)
 				m.ExpectRollback()
 			},
+			retErr: ErrUnknown,
 			expErr: ErrUnknown,
 			expID:  0,
 		},
@@ -71,6 +75,7 @@ func TestCreate(t *testing.T) {
 				m.ExpectExec("INSERT INTO users_lists").WithArgs(1, 1, true).WillReturnResult(sqlmock.NewResult(1, 1))
 				m.ExpectCommit().WillReturnError(e)
 			},
+			retErr: ErrUnknown,
 			expErr: ErrUnknown,
 			expID:  0,
 		},
@@ -83,6 +88,7 @@ func TestCreate(t *testing.T) {
 				m.ExpectExec("INSERT INTO users_lists").WithArgs(1, 1, true).WillReturnResult(sqlmock.NewResult(1, 1))
 				m.ExpectCommit()
 			},
+			retErr: nil,
 			expErr: nil,
 			expID:  1,
 		},
@@ -90,7 +96,7 @@ func TestCreate(t *testing.T) {
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			tc.setMock(mock, tc.expErr)
+			tc.setMock(mock, tc.retErr)
 			id, err := lr.Create("title", "description", 1)
 			require.Equal(t, tc.expID, id)
 			require.Equal(t, tc.expErr, err)
