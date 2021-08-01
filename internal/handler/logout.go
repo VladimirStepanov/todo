@@ -7,9 +7,18 @@ import (
 )
 
 func (h *Handler) logout(c *gin.Context) {
-	userID := c.GetInt64(idCtx)
-	userUUID := c.GetString(CtxUUID)
-	err := h.TokenService.Logout(userID, userUUID)
+	userID, err := h.GetUserId(c)
+	if err != nil {
+		h.InternalError(c, err)
+		return
+	}
+	userUUID, err := h.GetUserUUID(c)
+	if err != nil {
+		h.InternalError(c, err)
+		return
+	}
+
+	err = h.TokenService.Logout(userID, userUUID)
 	if err != nil {
 		h.InternalError(c, err)
 		return

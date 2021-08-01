@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -34,4 +35,32 @@ func (h *Handler) InternalError(c *gin.Context, err error) {
 		"status":  "error",
 		"message": "Internal server error",
 	})
+}
+
+func (h *Handler) GetUserId(c *gin.Context) (int64, error) {
+	uid, ok := c.Get(idCtx)
+	if !ok {
+		return 0, fmt.Errorf("can't get userID from context")
+	}
+
+	var res int64
+	if res, ok = uid.(int64); !ok {
+		return 0, fmt.Errorf("can't convert interface userID to int64")
+	}
+
+	return res, nil
+}
+
+func (h *Handler) GetUserUUID(c *gin.Context) (string, error) {
+	uUUID, ok := c.Get(CtxUUID)
+	if !ok {
+		return "", fmt.Errorf("can't get userUUID from context")
+	}
+
+	var res string
+	if res, ok = uUUID.(string); !ok {
+		return "", fmt.Errorf("can't convert interface userUUID to int64")
+	}
+
+	return res, nil
 }
