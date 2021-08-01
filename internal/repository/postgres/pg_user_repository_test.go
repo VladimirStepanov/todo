@@ -2,7 +2,6 @@ package postgres
 
 import (
 	"database/sql"
-	"fmt"
 	"testing"
 
 	"github.com/DATA-DOG/go-sqlmock"
@@ -19,34 +18,8 @@ var testUser = models.User{
 	ActivatedLink: "activated_link",
 }
 
-func TestCreateSuccess(t *testing.T) {
-	mockDB, mock, err := sqlmock.New()
-
-	if err != nil {
-		t.Fatal("Error while sqlmock.New()", err)
-	}
-
-	defer mockDB.Close()
-
-	db := sqlx.NewDb(mockDB, "sqlmock")
-
-	pr := NewPostgresUserRepository(db)
+func TestUserCreate(t *testing.T) {
 	var retID int64 = 1
-	rows := sqlmock.NewRows([]string{"id"}).AddRow(retID)
-	mock.ExpectQuery("INSERT INTO users").
-		WithArgs(testUser.Email, testUser.Password, testUser.ActivatedLink).
-		WillReturnRows(rows)
-
-	var inputUser models.User = testUser
-
-	retUser, err := pr.Create(&inputUser)
-
-	require.Equal(t, retID, retUser.ID)
-	require.NoError(t, err)
-
-}
-
-func TestCreateErrors(t *testing.T) {
 	mockDB, mock, err := sqlmock.New()
 
 	if err != nil {
@@ -58,26 +31,59 @@ func TestCreateErrors(t *testing.T) {
 	db := sqlx.NewDb(mockDB, "sqlmock")
 
 	pr := NewPostgresUserRepository(db)
-
-	unknownError := fmt.Errorf("Unknown error")
 
 	tests := []struct {
-		name       string
-		willRetErr error
-		expRetErr  error
+		name    string
+		setMock func(m sqlmock.Sqlmock, e error)
+		retErr  error
+		expErr  error
+		expID   int64
 	}{
-		{"Return unknown error", unknownError, unknownError},
-		{"Return user already exists", &pq.Error{Code: "23505"}, models.ErrUserAlreadyExists},
+		{
+			name: "Return unknown error",
+			setMock: func(m sqlmock.Sqlmock, e error) {
+				m.ExpectQuery("INSERT INTO users").
+					WithArgs(testUser.Email, testUser.Password, testUser.ActivatedLink).
+					WillReturnError(e)
+			},
+			retErr: ErrUnknown,
+			expErr: ErrUnknown,
+			expID:  0,
+		},
+		{
+			name: "Return user already exists",
+			setMock: func(m sqlmock.Sqlmock, e error) {
+				m.ExpectQuery("INSERT INTO users").WithArgs(testUser.Email, testUser.Password, testUser.ActivatedLink).WillReturnError(e)
+			},
+			retErr: &pq.Error{Code: "23505"},
+			expErr: models.ErrUserAlreadyExists,
+			expID:  0,
+		},
+		{
+			name: "Success create",
+			setMock: func(m sqlmock.Sqlmock, e error) {
+				rows := sqlmock.NewRows([]string{"id"}).AddRow(retID)
+				m.ExpectQuery("INSERT INTO users").
+					WithArgs(testUser.Email, testUser.Password, testUser.ActivatedLink).
+					WillReturnRows(rows)
+			},
+			retErr: nil,
+			expErr: nil,
+			expID:  retID,
+		},
 	}
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			mock.ExpectQuery("INSERT INTO users").
-				WithArgs(testUser.Email, testUser.Password, testUser.ActivatedLink).
-				WillReturnError(tc.willRetErr)
+			tc.setMock(mock, tc.retErr)
 			var inputUser models.User = testUser
-			_, err := pr.Create(&inputUser)
-			require.EqualError(t, err, tc.expRetErr.Error())
+
+			retUser, err := pr.Create(&inputUser)
+			require.Equal(t, tc.expErr, err)
+
+			if err == nil {
+				require.Equal(t, retID, retUser.ID)
+			}
 		})
 	}
 }
@@ -93,86 +99,120 @@ func TestConfirmEmail(t *testing.T) {
 
 	db := sqlx.NewDb(mockDB, "sqlmock")
 
+	pr := NewPostgresUserRepository(db)
+
 	tests := []struct {
-		name         string
-		rowsAffected int
-		retErr       error
+		name    string
+		setMock func(m sqlmock.Sqlmock, e error)
+		retErr  error
+		expErr  error
 	}{
-		{"Success update", 1, nil},
-		{"Error update", 0, models.ErrConfirmLinkNotExists},
+		{
+			name: "Return unknown error",
+			setMock: func(m sqlmock.Sqlmock, e error) {
+				m.ExpectExec("UPDATE users").WithArgs("link").WillReturnError(e)
+			},
+			retErr: ErrUnknown,
+			expErr: ErrUnknown,
+		},
+		{
+			name: "Zero rows affected error",
+			setMock: func(m sqlmock.Sqlmock, e error) {
+				mock.ExpectExec("UPDATE users").WillReturnResult(sqlmock.NewResult(0, 0))
+			},
+			retErr: nil,
+			expErr: models.ErrConfirmLinkNotExists,
+		},
+		{
+			name: "Success confirm",
+			setMock: func(m sqlmock.Sqlmock, e error) {
+				mock.ExpectExec("UPDATE users").WillReturnResult(sqlmock.NewResult(1, 1))
+			},
+			retErr: nil,
+			expErr: nil,
+		},
 	}
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			pr := NewPostgresUserRepository(db)
-			mock.ExpectExec("UPDATE users").WillReturnResult(sqlmock.NewResult(0, int64(tc.rowsAffected)))
-			err := pr.ConfirmEmail("testlink")
-
-			require.Equal(t, err, tc.retErr)
+			tc.setMock(mock, tc.retErr)
+			err := pr.ConfirmEmail("link")
+			require.Equal(t, tc.expErr, err)
 		})
 	}
 }
 
-func TestFindUserByEmailErrors(t *testing.T) {
-	mockDB, mock, err := sqlmock.New()
-
-	if err != nil {
-		t.Fatal("Error while sqlmock.New()", err)
-	}
-
-	defer mockDB.Close()
-
-	db := sqlx.NewDb(mockDB, "sqlmock")
-
-	pr := NewPostgresUserRepository(db)
-
-	unknownError := fmt.Errorf("Unknown error")
-	tests := []struct {
-		name       string
-		willRetErr error
-		expRetErr  error
-	}{
-		{"Return unknown error", unknownError, unknownError},
-		{"Return bad user error", sql.ErrNoRows, models.ErrBadUser},
-	}
-
-	for _, tc := range tests {
-		t.Run(tc.name, func(t *testing.T) {
-			mock.ExpectQuery("SELECT (.+) FROM users").
-				WithArgs(testUser.Email).
-				WillReturnError(tc.willRetErr)
-			_, err := pr.FindUserByEmail(testUser.Email)
-			require.EqualError(t, err, tc.expRetErr.Error())
-		})
-	}
-}
-
-func TestFindUserByEmailSuccess(t *testing.T) {
-	mockDB, mock, err := sqlmock.New()
-
-	if err != nil {
-		t.Fatal("Error while sqlmock.New()", err)
-	}
-
-	defer mockDB.Close()
-
-	db := sqlx.NewDb(mockDB, "sqlmock")
-
-	pr := NewPostgresUserRepository(db)
+func TestFindUserByEmail(t *testing.T) {
 	var retID int64 = 1
-	rows := sqlmock.NewRows(
-		[]string{"id", "email", "password_hash", "is_activated", "activated_link"},
-	).AddRow(retID, testUser.Email, testUser.Password, testUser.IsActivated, testUser.ActivatedLink)
-	mock.ExpectQuery("SELECT (.+) FROM users").
-		WithArgs(testUser.Email).
-		WillReturnRows(rows)
+	mockDB, mock, err := sqlmock.New()
 
-	var inputUser models.User = testUser
-	inputUser.ID = retID
+	if err != nil {
+		t.Fatal("Error while sqlmock.New()", err)
+	}
 
-	retUser, err := pr.FindUserByEmail(testUser.Email)
+	defer mockDB.Close()
 
-	require.Equal(t, &inputUser, retUser)
-	require.NoError(t, err)
+	db := sqlx.NewDb(mockDB, "sqlmock")
 
+	pr := NewPostgresUserRepository(db)
+
+	tests := []struct {
+		name    string
+		setMock func(m sqlmock.Sqlmock, e error)
+		retErr  error
+		expErr  error
+		expID   int64
+	}{
+		{
+			name: "Return unknown error",
+			setMock: func(m sqlmock.Sqlmock, e error) {
+				m.ExpectQuery("SELECT (.+) FROM users").
+					WithArgs(testUser.Email).
+					WillReturnError(e)
+			},
+			retErr: ErrUnknown,
+			expErr: ErrUnknown,
+			expID:  0,
+		},
+		{
+			name: "Return bad user error",
+			setMock: func(m sqlmock.Sqlmock, e error) {
+				m.ExpectQuery("SELECT (.+) FROM users").
+					WithArgs(testUser.Email).
+					WillReturnError(e)
+			},
+			retErr: sql.ErrNoRows,
+			expErr: models.ErrBadUser,
+			expID:  0,
+		},
+		{
+			name: "Success find",
+			setMock: func(m sqlmock.Sqlmock, e error) {
+				rows := sqlmock.NewRows(
+					[]string{"id", "email", "password_hash", "is_activated", "activated_link"},
+				).AddRow(retID, testUser.Email, testUser.Password, testUser.IsActivated, testUser.ActivatedLink)
+				m.ExpectQuery("SELECT (.+) FROM users").
+					WithArgs(testUser.Email).
+					WillReturnRows(rows)
+			},
+			retErr: nil,
+			expErr: nil,
+			expID:  retID,
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			tc.setMock(mock, tc.retErr)
+			var inputUser models.User = testUser
+			inputUser.ID = retID
+
+			retUser, err := pr.FindUserByEmail(testUser.Email)
+			require.Equal(t, tc.expErr, err)
+
+			if err == nil {
+				require.Equal(t, &inputUser, retUser)
+			}
+		})
+	}
 }
