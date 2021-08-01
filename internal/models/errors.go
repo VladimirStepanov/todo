@@ -11,4 +11,6 @@ var (
 	ErrBadToken             = errors.New("invalid token")
 	ErrUserUnauthorized     = errors.New("user is unauthorized")
 	ErrTokenExpired         = errors.New("token is expired")
+	ErrNoAuthHeader         = errors.New("no authorization header")
+	ErrInvalidAuthHeader    = errors.New("invalid authorization header")
 )
