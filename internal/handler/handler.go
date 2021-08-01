@@ -33,7 +33,7 @@ func (h *Handler) InitRoutes(mode string) http.Handler {
 	{
 		lists := api.Group("/lists")
 		{
-			lists.POST("/", h.listCreate)
+			lists.POST("", h.listCreate)
 		}
 	}
 	return r
@@ -50,5 +50,6 @@ func New(
 		UserService:  UserService,
 		MailService:  MailService,
 		TokenService: TokenService,
+		ListService:  ListService,
 		logger:       logger}
 }
