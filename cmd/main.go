@@ -36,7 +36,7 @@ func main() {
 	}
 
 	tokenRepo := redisrepo.NewRedisRepository(redisClient)
-	userRepo := postgres.NewPostgresRepository(db)
+	userRepo := postgres.NewPostgresUserRepository(db)
 	userService := service.NewUserService(userRepo)
 	mailService := service.NewMailService(cfg.Email, cfg.EmailPassword, cfg.Domain)
 	tokenService := service.NewTokenService(cfg.AccessKey, cfg.RefreshKey, cfg.MaxLoggedIn, tokenRepo)

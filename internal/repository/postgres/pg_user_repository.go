@@ -8,15 +8,15 @@ import (
 	"github.com/lib/pq"
 )
 
-type PostgresRepository struct {
+type PostgresUserRepository struct {
 	DB *sqlx.DB
 }
 
-func NewPostgresRepository(DB *sqlx.DB) models.UserRepository {
-	return &PostgresRepository{DB: DB}
+func NewPostgresUserRepository(DB *sqlx.DB) models.UserRepository {
+	return &PostgresUserRepository{DB: DB}
 }
 
-func (pr *PostgresRepository) Create(user *models.User) (*models.User, error) {
+func (pr *PostgresUserRepository) Create(user *models.User) (*models.User, error) {
 
 	var insertedID int64
 
@@ -37,7 +37,7 @@ func (pr *PostgresRepository) Create(user *models.User) (*models.User, error) {
 	return user, nil
 }
 
-func (pr *PostgresRepository) ConfirmEmail(Link string) error {
+func (pr *PostgresUserRepository) ConfirmEmail(Link string) error {
 	res, err := pr.DB.Exec("UPDATE users SET is_activated=TRUE WHERE activated_link=$1 AND is_activated=FALSE", Link)
 	if err != nil {
 		return err
@@ -53,7 +53,7 @@ func (pr *PostgresRepository) ConfirmEmail(Link string) error {
 	return nil
 }
 
-func (pr *PostgresRepository) FindUserByEmail(Email string) (*models.User, error) {
+func (pr *PostgresUserRepository) FindUserByEmail(Email string) (*models.User, error) {
 	user := &models.User{}
 
 	err := pr.DB.Get(user, "SELECT * FROM users WHERE email=$1", Email)

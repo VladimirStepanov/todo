@@ -125,7 +125,7 @@ func (suite *TestingSuite) SetupSuite() {
 	initDb(suite.T(), db)
 	initRedis(suite.T(), redisClient)
 
-	repo := postgres.NewPostgresRepository(db)
+	repo := postgres.NewPostgresUserRepository(db)
 	tokenRepo := redisrepo.NewRedisRepository(redisClient)
 	userService := service.NewUserService(repo)
 	tokenService := service.NewTokenService(accessKey, refreshKey, maxLoggenInCount, tokenRepo)

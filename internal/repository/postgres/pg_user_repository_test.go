@@ -30,7 +30,7 @@ func TestCreateSuccess(t *testing.T) {
 
 	db := sqlx.NewDb(mockDB, "sqlmock")
 
-	pr := NewPostgresRepository(db)
+	pr := NewPostgresUserRepository(db)
 	var retID int64 = 1
 	rows := sqlmock.NewRows([]string{"id"}).AddRow(retID)
 	mock.ExpectQuery("INSERT INTO users").
@@ -57,7 +57,7 @@ func TestCreateErrors(t *testing.T) {
 
 	db := sqlx.NewDb(mockDB, "sqlmock")
 
-	pr := NewPostgresRepository(db)
+	pr := NewPostgresUserRepository(db)
 
 	unknownError := fmt.Errorf("Unknown error")
 
@@ -100,7 +100,7 @@ func TestConfirmEmail(t *testing.T) {
 	}
 
 	for _, tc := range tests {
-		pr := NewPostgresRepository(db)
+		pr := NewPostgresUserRepository(db)
 		mock.ExpectExec("UPDATE users").WillReturnResult(sqlmock.NewResult(0, int64(tc.rowsAffected)))
 		err := pr.ConfirmEmail("testlink")
 
@@ -119,7 +119,7 @@ func TestFindUserByEmailErrors(t *testing.T) {
 
 	db := sqlx.NewDb(mockDB, "sqlmock")
 
-	pr := NewPostgresRepository(db)
+	pr := NewPostgresUserRepository(db)
 
 	unknownError := fmt.Errorf("Unknown error")
 	tests := []struct {
@@ -150,7 +150,7 @@ func TestFindUserByEmailSuccess(t *testing.T) {
 
 	db := sqlx.NewDb(mockDB, "sqlmock")
 
-	pr := NewPostgresRepository(db)
+	pr := NewPostgresUserRepository(db)
 	var retID int64 = 1
 	rows := sqlmock.NewRows(
 		[]string{"id", "email", "password_hash", "is_activated", "activated_link"},
