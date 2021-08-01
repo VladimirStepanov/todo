@@ -20,7 +20,7 @@ func (pr *PostgresUserRepository) Create(user *models.User) (*models.User, error
 
 	var insertedID int64
 
-	err := pr.DB.QueryRowx(
+	err := pr.DB.QueryRow(
 		"INSERT INTO users(email, password_hash, activated_link) values($1, $2, $3) RETURNING id",
 		user.Email, user.Password, user.ActivatedLink,
 	).Scan(&insertedID)
