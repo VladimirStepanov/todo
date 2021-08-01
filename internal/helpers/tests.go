@@ -14,10 +14,8 @@ func MakeRequest(router http.Handler, t *testing.T, method, path string, input *
 	req := httptest.NewRequest(method, path, input)
 	req.Header.Set("Content-Type", "application/json")
 
-	if headers != nil {
-		for h, v := range headers {
-			req.Header.Set(h, v)
-		}
+	for h, v := range headers {
+		req.Header.Set(h, v)
 	}
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
