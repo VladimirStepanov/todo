@@ -126,14 +126,16 @@ func (suite *TestingSuite) SetupSuite() {
 	initRedis(suite.T(), redisClient)
 
 	repo := postgres.NewPostgresUserRepository(db)
+	listRepo := postgres.NewPostgresListRepository(db)
 	tokenRepo := redisrepo.NewRedisRepository(redisClient)
 	userService := service.NewUserService(repo)
 	tokenService := service.NewTokenService(accessKey, refreshKey, maxLoggenInCount, tokenRepo)
+	listService := service.NewListService(listRepo)
 	msObj := new(mocks.MailService)
 	msObj.On("SendConfirmationsEmail", mock.Anything).Return(nil)
 	logger := logrus.New()
 	logger.Out = ioutil.Discard
-	suite.router = handler.New(userService, msObj, tokenService, logger).InitRoutes(gin.TestMode)
+	suite.router = handler.New(userService, msObj, tokenService, listService, logger).InitRoutes(gin.TestMode)
 }
 
 func TestSuite(t *testing.T) {

@@ -69,7 +69,7 @@ func TestRefresh(t *testing.T) {
 			tsObj := new(mocks.TokenService)
 			tsObj.On("Refresh", mock.Anything).Return(tc.tsRetTd, tc.tsRetErr)
 
-			handler := New(nil, nil, tsObj, getTestLogger())
+			handler := New(nil, nil, tsObj, nil, getTestLogger())
 			r := handler.InitRoutes(gin.TestMode)
 			code, data := helpers.MakeRequest(
 				r,

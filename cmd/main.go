@@ -35,16 +35,18 @@ func main() {
 		return
 	}
 
+	listRepo := postgres.NewPostgresListRepository(db)
 	tokenRepo := redisrepo.NewRedisRepository(redisClient)
 	userRepo := postgres.NewPostgresUserRepository(db)
 	userService := service.NewUserService(userRepo)
 	mailService := service.NewMailService(cfg.Email, cfg.EmailPassword, cfg.Domain)
+	listService := service.NewListService(listRepo)
 	tokenService := service.NewTokenService(cfg.AccessKey, cfg.RefreshKey, cfg.MaxLoggedIn, tokenRepo)
 
 	logger := logrus.New()
 	logger.SetFormatter(&logrus.JSONFormatter{})
 
-	handler := handler.New(userService, mailService, tokenService, logger)
+	handler := handler.New(userService, mailService, tokenService, listService, logger)
 
 	srv := server.New(cfg.GetServerAddr(), handler.InitRoutes(cfg.Mode))
 	if err := srv.Run(); err != nil {

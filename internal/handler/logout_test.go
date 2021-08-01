@@ -139,7 +139,7 @@ func TestLogout(t *testing.T) {
 			tsObj.On("Verify", mock.Anything).Return(tc.verifyRetUserID, tc.verifyRetUserUUID, tc.verifyRerErr)
 			tsObj.On("Logout", mock.Anything, mock.Anything).Return(tc.logoutRetErr)
 
-			handler := New(nil, nil, tsObj, getTestLogger())
+			handler := New(nil, nil, tsObj, nil, getTestLogger())
 			r := handler.InitRoutes(gin.TestMode)
 			code, data := helpers.MakeRequest(
 				r,

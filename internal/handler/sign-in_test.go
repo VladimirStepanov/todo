@@ -94,7 +94,7 @@ func TestSignIn(t *testing.T) {
 			tsObj := new(mocks.TokenService)
 			tsObj.On("NewTokenPair", mock.Anything).Return(tc.tsRetTd, tc.tsRetErr)
 
-			handler := New(usObj, nil, tsObj, getTestLogger())
+			handler := New(usObj, nil, tsObj, nil, getTestLogger())
 			r := handler.InitRoutes(gin.TestMode)
 			code, data := helpers.MakeRequest(
 				r,

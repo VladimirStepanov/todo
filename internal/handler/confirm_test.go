@@ -30,7 +30,7 @@ func TestConfirmHandler(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			usObj := new(mocks.UserService)
 			usObj.On("ConfirmEmail", mock.Anything).Return(tc.mockErr)
-			handler := New(usObj, nil, nil, getTestLogger())
+			handler := New(usObj, nil, nil, nil, getTestLogger())
 
 			r := handler.InitRoutes(gin.TestMode)
 

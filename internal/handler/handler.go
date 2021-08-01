@@ -12,6 +12,7 @@ type Handler struct {
 	UserService  models.UserService
 	MailService  models.MailService
 	TokenService models.TokenService
+	ListService  models.ListService
 	logger       *logrus.Logger
 }
 
@@ -28,6 +29,13 @@ func (h *Handler) InitRoutes(mode string) http.Handler {
 		auth.GET("/logout", h.authMiddleware, h.logout)
 	}
 
+	api := r.Group("/api", h.authMiddleware)
+	{
+		lists := api.Group("/lists")
+		{
+			lists.POST("/", h.listCreate)
+		}
+	}
 	return r
 }
 
@@ -35,6 +43,7 @@ func New(
 	UserService models.UserService,
 	MailService models.MailService,
 	TokenService models.TokenService,
+	ListService models.ListService,
 	logger *logrus.Logger) *Handler {
 
 	return &Handler{
