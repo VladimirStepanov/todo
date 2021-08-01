@@ -25,6 +25,7 @@ func (h *Handler) InitRoutes(mode string) http.Handler {
 		auth.GET("/confirm/:link", h.confirm)
 		auth.POST("/sign-up", h.signUp)
 		auth.POST("/refresh", h.refreshToken)
+		auth.GET("/logout", h.authMiddleware, h.logout)
 	}
 
 	return r
