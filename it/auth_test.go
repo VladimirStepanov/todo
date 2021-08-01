@@ -15,6 +15,24 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+func makeLogout(t *testing.T, r http.Handler, data []byte) {
+	tokenResp := &handler.TokensResponse{}
+	err := json.Unmarshal(data, tokenResp)
+	require.NoError(t, err)
+	headers := map[string]string{
+		"Authorization": fmt.Sprintf("Bearer %s", tokenResp.AccessToken),
+	}
+	code, _ := helpers.MakeRequest(
+		r,
+		t,
+		http.MethodGet,
+		"/auth/logout",
+		bytes.NewBuffer([]byte{}),
+		headers,
+	)
+	require.Equal(t, http.StatusOK, code)
+}
+
 func (suite *TestingSuite) TestSignUp() {
 
 	tests := []struct {
@@ -174,6 +192,8 @@ func (suite *TestingSuite) TestSignIn() {
 				require.NoError(t, err)
 				require.Equal(t, "error", resp.Status)
 				require.Equal(t, tc.errMsg, resp.Message)
+			} else if tc.code == http.StatusOK {
+				makeLogout(t, suite.router, data)
 			}
 		})
 	}
@@ -262,6 +282,8 @@ func (suite *TestingSuite) TestRefresh() {
 				require.NoError(t, err)
 				require.Equal(t, "error", resp.Status)
 				require.Equal(t, tc.errMsg, resp.Message)
+			} else if tc.code == http.StatusOK {
+				makeLogout(t, suite.router, data)
 			}
 		})
 	}
