@@ -62,20 +62,23 @@ func TestCreateErrors(t *testing.T) {
 	unknownError := fmt.Errorf("Unknown error")
 
 	tests := []struct {
+		name       string
 		willRetErr error
 		expRetErr  error
 	}{
-		{unknownError, unknownError},
-		{&pq.Error{Code: "23505"}, models.ErrUserAlreadyExists},
+		{"Return unknown error", unknownError, unknownError},
+		{"Return user already exists", &pq.Error{Code: "23505"}, models.ErrUserAlreadyExists},
 	}
 
 	for _, tc := range tests {
-		mock.ExpectQuery("INSERT INTO users").
-			WithArgs(testUser.Email, testUser.Password, testUser.ActivatedLink).
-			WillReturnError(tc.willRetErr)
-		var inputUser models.User = testUser
-		_, err := pr.Create(&inputUser)
-		require.EqualError(t, err, tc.expRetErr.Error())
+		t.Run(tc.name, func(t *testing.T) {
+			mock.ExpectQuery("INSERT INTO users").
+				WithArgs(testUser.Email, testUser.Password, testUser.ActivatedLink).
+				WillReturnError(tc.willRetErr)
+			var inputUser models.User = testUser
+			_, err := pr.Create(&inputUser)
+			require.EqualError(t, err, tc.expRetErr.Error())
+		})
 	}
 }
 
@@ -100,11 +103,13 @@ func TestConfirmEmail(t *testing.T) {
 	}
 
 	for _, tc := range tests {
-		pr := NewPostgresUserRepository(db)
-		mock.ExpectExec("UPDATE users").WillReturnResult(sqlmock.NewResult(0, int64(tc.rowsAffected)))
-		err := pr.ConfirmEmail("testlink")
+		t.Run(tc.name, func(t *testing.T) {
+			pr := NewPostgresUserRepository(db)
+			mock.ExpectExec("UPDATE users").WillReturnResult(sqlmock.NewResult(0, int64(tc.rowsAffected)))
+			err := pr.ConfirmEmail("testlink")
 
-		require.Equal(t, err, tc.retErr)
+			require.Equal(t, err, tc.retErr)
+		})
 	}
 }
 
@@ -123,19 +128,22 @@ func TestFindUserByEmailErrors(t *testing.T) {
 
 	unknownError := fmt.Errorf("Unknown error")
 	tests := []struct {
+		name       string
 		willRetErr error
 		expRetErr  error
 	}{
-		{unknownError, unknownError},
-		{sql.ErrNoRows, models.ErrBadUser},
+		{"Return unknown error", unknownError, unknownError},
+		{"Return bad user error", sql.ErrNoRows, models.ErrBadUser},
 	}
 
 	for _, tc := range tests {
-		mock.ExpectQuery("SELECT (.+) FROM users").
-			WithArgs(testUser.Email).
-			WillReturnError(tc.willRetErr)
-		_, err := pr.FindUserByEmail(testUser.Email)
-		require.EqualError(t, err, tc.expRetErr.Error())
+		t.Run(tc.name, func(t *testing.T) {
+			mock.ExpectQuery("SELECT (.+) FROM users").
+				WithArgs(testUser.Email).
+				WillReturnError(tc.willRetErr)
+			_, err := pr.FindUserByEmail(testUser.Email)
+			require.EqualError(t, err, tc.expRetErr.Error())
+		})
 	}
 }
 
