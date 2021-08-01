@@ -16,7 +16,38 @@ func NewPostgresListRepository(db *sqlx.DB) models.ListRepository {
 }
 
 func (ls *PostgresListRepository) Create(title, description string, userID int64) (int64, error) {
-	return 0, nil
+	tx, err := ls.DB.Beginx()
+	if err != nil {
+		return 0, err
+	}
+
+	var listID int64
+
+	err = tx.QueryRow(
+		"INSERT INTO lists(title, description) VALUES($1, $2) RETURNING id",
+		title, description,
+	).Scan(&listID)
+
+	if err != nil {
+		tx.Rollback()
+		return 0, err
+	}
+
+	_, err = tx.Exec(
+		"INSERT INTO users_lists(user_id, list_id, is_admin) VALUES($1, $2, $3)",
+		userID, listID, true,
+	)
+
+	if err != nil {
+		tx.Rollback()
+		return 0, err
+	}
+
+	err = tx.Commit()
+	if err != nil {
+		return 0, err
+	}
+	return listID, nil
 }
 
 func (ls *PostgresListRepository) GrantRole(listID, fromUser, toUserID int64, role bool) error {
