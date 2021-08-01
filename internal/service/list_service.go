@@ -13,7 +13,7 @@ func NewListService(repo models.ListRepository) models.ListService {
 }
 
 func (ls *ListService) Create(title, description string, userID int64) (int64, error) {
-	return 0, nil
+	return ls.repo.Create(title, description, userID)
 }
 
 func (ls *ListService) GrantRole(listID, fromUser, toUserID int64, role bool) error {
