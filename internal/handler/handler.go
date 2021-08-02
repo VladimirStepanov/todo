@@ -34,6 +34,7 @@ func (h *Handler) InitRoutes(mode string) http.Handler {
 		lists := api.Group("/lists")
 		{
 			lists.POST("", h.listCreate)
+			lists.GET("/:list_id", h.getListByID)
 		}
 	}
 	return r
