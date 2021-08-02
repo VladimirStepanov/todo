@@ -14,4 +14,5 @@ var (
 	ErrNoAuthHeader         = errors.New("no authorization header")
 	ErrInvalidAuthHeader    = errors.New("invalid authorization header")
 	ErrNoList               = errors.New("list not found")
+	ErrBadParam             = errors.New("bad url parameter")
 )
