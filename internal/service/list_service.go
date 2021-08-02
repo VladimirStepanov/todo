@@ -21,7 +21,7 @@ func (ls *ListService) GrantRole(listID, fromUser, toUserID int64, role bool) er
 }
 
 func (ls *ListService) GetListByID(listID, userID int64) (*models.List, error) {
-	return nil, nil
+	return ls.repo.GetListByID(listID, userID)
 }
 
 func (ls *ListService) GetUserLists(userID int64) ([]*models.List, error) {
