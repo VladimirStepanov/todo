@@ -1,9 +1,9 @@
 package models
 
 type List struct {
-	ID          int64  `db:"id"`
-	Title       string `db:"title"`
-	Description string `db:"description"`
+	ID          int64  `json:"list_id" db:"id"`
+	Title       string `json:"title" db:"title"`
+	Description string `json:"description" db:"description"`
 }
 
 type UsersList struct {
