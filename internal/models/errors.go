@@ -13,4 +13,5 @@ var (
 	ErrTokenExpired         = errors.New("token is expired")
 	ErrNoAuthHeader         = errors.New("no authorization header")
 	ErrInvalidAuthHeader    = errors.New("invalid authorization header")
+	ErrNoList               = errors.New("list not found")
 )
