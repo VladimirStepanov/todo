@@ -1,6 +1,8 @@
 package postgres
 
 import (
+	"database/sql"
+
 	"github.com/VladimirStepanov/todo-app/internal/models"
 	"github.com/jmoiron/sqlx"
 )
@@ -55,7 +57,20 @@ func (ls *PostgresListRepository) GrantRole(listID, fromUser, toUserID int64, ro
 }
 
 func (ls *PostgresListRepository) GetListByID(listID, userID int64) (*models.List, error) {
-	return nil, nil
+	res := &models.List{}
+
+	err := ls.DB.Get(
+		res,
+		"SELECT id, title, description FROM lists l INNER JOIN users_lists ul on l.id = ul.list_id WHERE ul.user_id=$1 AND ul.list_id = $2;",
+		userID, listID)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			err = models.ErrNoList
+		}
+		return nil, err
+	}
+
+	return res, nil
 }
 
 func (ls *PostgresListRepository) GetUserLists(userID int64) ([]*models.List, error) {
