@@ -15,10 +15,14 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func makeLogout(t *testing.T, r http.Handler, data []byte) {
-	tokenResp := &handler.TokensResponse{}
-	err := json.Unmarshal(data, tokenResp)
+func rawToTokensResponse(t *testing.T, data []byte) *handler.TokensResponse {
+	authResp := &handler.TokensResponse{}
+	err := json.Unmarshal(data, authResp)
 	require.NoError(t, err)
+	return authResp
+}
+
+func makeLogout(t *testing.T, r http.Handler, tokenResp *handler.TokensResponse) {
 	headers := map[string]string{
 		"Authorization": fmt.Sprintf("Bearer %s", tokenResp.AccessToken),
 	}
@@ -31,6 +35,20 @@ func makeLogout(t *testing.T, r http.Handler, data []byte) {
 		headers,
 	)
 	require.Equal(t, http.StatusOK, code)
+}
+
+func makeSignIn(t *testing.T, r http.Handler, input string) *handler.TokensResponse {
+	code, rawData := helpers.MakeRequest(
+		r,
+		t,
+		http.MethodPost,
+		"/auth/sign-in",
+		bytes.NewBuffer([]byte(input)),
+		nil,
+	)
+	require.Equal(t, http.StatusOK, code)
+
+	return rawToTokensResponse(t, rawData)
 }
 
 func (suite *TestingSuite) TestSignUp() {
@@ -208,7 +226,8 @@ func (suite *TestingSuite) TestSignIn() {
 				require.Equal(t, "error", resp.Status)
 				require.Equal(t, tc.errMsg, resp.Message)
 			} else if tc.code == http.StatusOK {
-				makeLogout(t, suite.router, data)
+				tokenResp := rawToTokensResponse(t, data)
+				makeLogout(t, suite.router, tokenResp)
 			}
 		})
 	}
@@ -231,9 +250,7 @@ func (suite *TestingSuite) TestRefresh() {
 	)
 	require.Equal(suite.T(), http.StatusOK, code)
 
-	authResp := &handler.TokensResponse{}
-	err := json.Unmarshal(data, authResp)
-	require.NoError(suite.T(), err)
+	authResp := rawToTokensResponse(suite.T(), data)
 
 	tests := []struct {
 		name   string
@@ -301,7 +318,8 @@ func (suite *TestingSuite) TestRefresh() {
 				require.Equal(t, "error", resp.Status)
 				require.Equal(t, tc.errMsg, resp.Message)
 			} else if tc.code == http.StatusOK {
-				makeLogout(t, suite.router, data)
+				authResp := rawToTokensResponse(t, data)
+				makeLogout(t, suite.router, authResp)
 			}
 		})
 	}

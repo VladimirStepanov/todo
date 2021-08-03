@@ -29,19 +29,7 @@ func (suite *TestingSuite) TestCreateAndGetList() {
 		`{"email": "%s", "password": "%s"}`,
 		createListUser.Email, defaultPassword,
 	)
-	code, signInData := helpers.MakeRequest(
-		suite.router,
-		suite.T(),
-		http.MethodPost,
-		"/auth/sign-in",
-		bytes.NewBuffer([]byte(siginInput)),
-		nil,
-	)
-	require.Equal(suite.T(), http.StatusOK, code)
-
-	authResp := &handler.TokensResponse{}
-	err := json.Unmarshal(signInData, authResp)
-	require.NoError(suite.T(), err)
+	authResp := makeSignIn(suite.T(), suite.router, siginInput)
 
 	headers := map[string]string{
 		"Authorization": fmt.Sprintf("Bearer %s", authResp.AccessToken),
@@ -58,7 +46,7 @@ func (suite *TestingSuite) TestCreateAndGetList() {
 	require.Equal(suite.T(), http.StatusOK, code)
 
 	crResp := &handler.ListCreateResponse{}
-	err = json.Unmarshal(listCreateData, crResp)
+	err := json.Unmarshal(listCreateData, crResp)
 	require.NoError(suite.T(), err)
 
 	code, listGetData := helpers.MakeRequest(
@@ -78,5 +66,5 @@ func (suite *TestingSuite) TestCreateAndGetList() {
 	require.Equal(suite.T(), listForCreate.Title, userList.Title)
 	require.Equal(suite.T(), listForCreate.Description, userList.Description)
 
-	makeLogout(suite.T(), suite.router, signInData)
+	makeLogout(suite.T(), suite.router, authResp)
 }
