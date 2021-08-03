@@ -31,7 +31,9 @@ func (ls *PostgresListRepository) Create(title, description string, userID int64
 	).Scan(&listID)
 
 	if err != nil {
-		tx.Rollback()
+		if e := tx.Rollback(); e != nil {
+			err = e
+		}
 		return 0, err
 	}
 
@@ -41,7 +43,9 @@ func (ls *PostgresListRepository) Create(title, description string, userID int64
 	)
 
 	if err != nil {
-		tx.Rollback()
+		if e := tx.Rollback(); e != nil {
+			err = e
+		}
 		return 0, err
 	}
 
