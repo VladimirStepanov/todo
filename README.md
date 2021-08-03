@@ -179,3 +179,59 @@ curl -H "Authorization: Bearer ${ACCESS_TOKEN}" localhost:8080/auth/logout
 ```json
 {"status": "success"}
 ```
+
+## Create list
+
+`POST /api/lists/`
+
+Params (HTTP header):
+* Authorization: Bearer <access_token>
+
+Params (json):
+* title [string]
+* description [string]
+
+
+#### Request
+```bash
+curl -L -X POST 'localhost:8080/api/lists' -H 'Content-Type: application/json' -H "Authorization: Bearer ${ACCESS_TOKEN}" --data-raw '{
+    "title": "hello",
+    "description": "world"
+}'
+```
+
+#### Response
+
+```json
+{
+    "status": "success",
+    "list_id": 4
+}
+```
+
+
+## Get list by id
+
+`GET /api/lists/:list_id`
+
+Params (HTTP header):
+* Authorization: Bearer <access_token>
+
+URL:
+
+* list id (integer)
+
+#### Request
+```bash
+curl -H "Authorization: Bearer ${ACCESS_TOKEN}" localhost:8080/api/lists/1
+```
+
+#### Response
+
+```json
+{
+    "list_id": 1,
+    "title": "title",
+    "description": "description"
+}
+```
