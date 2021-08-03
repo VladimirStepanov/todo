@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"testing"
 
 	"github.com/VladimirStepanov/todo-app/internal/handler"
 	"github.com/VladimirStepanov/todo-app/internal/helpers"
@@ -18,6 +19,25 @@ var (
 		Description: "description",
 	}
 )
+
+//expected success list create
+func createList(t *testing.T, r http.Handler, input string, headers map[string]string) int64 {
+	code, listCreateData := helpers.MakeRequest(
+		r,
+		t,
+		http.MethodPost,
+		"/api/lists",
+		bytes.NewBuffer([]byte(input)),
+		headers,
+	)
+	require.Equal(t, http.StatusOK, code)
+
+	crResp := &handler.ListCreateResponse{}
+	err := json.Unmarshal(listCreateData, crResp)
+	require.NoError(t, err)
+
+	return crResp.ListID
+}
 
 func (suite *TestingSuite) TestCreateAndGetList() {
 	listInput := fmt.Sprintf(
@@ -35,32 +55,20 @@ func (suite *TestingSuite) TestCreateAndGetList() {
 		"Authorization": fmt.Sprintf("Bearer %s", authResp.AccessToken),
 	}
 
-	code, listCreateData := helpers.MakeRequest(
-		suite.router,
-		suite.T(),
-		http.MethodPost,
-		"/api/lists",
-		bytes.NewBuffer([]byte(listInput)),
-		headers,
-	)
-	require.Equal(suite.T(), http.StatusOK, code)
-
-	crResp := &handler.ListCreateResponse{}
-	err := json.Unmarshal(listCreateData, crResp)
-	require.NoError(suite.T(), err)
+	listID := createList(suite.T(), suite.router, listInput, headers)
 
 	code, listGetData := helpers.MakeRequest(
 		suite.router,
 		suite.T(),
 		http.MethodGet,
-		fmt.Sprintf("/api/lists/%d", crResp.ListID),
+		fmt.Sprintf("/api/lists/%d", listID),
 		bytes.NewBuffer([]byte{}),
 		headers,
 	)
 	require.Equal(suite.T(), http.StatusOK, code)
 
 	userList := &models.List{}
-	err = json.Unmarshal(listGetData, userList)
+	err := json.Unmarshal(listGetData, userList)
 	require.NoError(suite.T(), err)
 
 	require.Equal(suite.T(), listForCreate.Title, userList.Title)
