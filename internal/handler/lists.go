@@ -32,10 +32,7 @@ func (h *Handler) listCreate(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"status":  "success",
-		"list_id": listID,
-	})
+	c.JSON(http.StatusOK, &ListCreateResponse{"success", listID})
 }
 
 func (h *Handler) getListByID(c *gin.Context) {

@@ -7,6 +7,11 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+type ListCreateResponse struct {
+	Status string `json:"status"`
+	ListID int64  `json:"list_id"`
+}
+
 type TokensResponse struct {
 	AccessToken  string `json:"access_token"`
 	RefreshToken string `json:"refresh_token"`
