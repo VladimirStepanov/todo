@@ -102,7 +102,10 @@ var (
 func initDb(t *testing.T, db *sqlx.DB) {
 
 	for _, u := range dataForInsert {
-		_, err := db.NamedExec("INSERT INTO users(email, password_hash, is_activated, activated_link) values(:email, :password_hash, :is_activated, :activated_link)", u)
+		_, err := db.NamedExec(
+			`INSERT INTO 
+			 users(email, password_hash, is_activated, activated_link) 
+			 VALUES(:email, :password_hash, :is_activated, :activated_link)`, u)
 		if err != nil {
 			t.Fatal("Error while initDb", err)
 		}
@@ -116,15 +119,18 @@ func initRedis(t *testing.T, client *redis.Client) {
 
 func (suite *TestingSuite) SetupSuite() {
 	db, err := postgres.NewDB(
-		os.Getenv("POSTGRES_HOST"), os.Getenv("POSTGRES_PORT"), os.Getenv("POSTGRES_USER"),
-		os.Getenv("POSTGRES_PASSWORD"), os.Getenv("POSTGRES_DB"), "disable",
+		os.Getenv("POSTGRES_HOST"), os.Getenv("POSTGRES_PORT"),
+		os.Getenv("POSTGRES_USER"), os.Getenv("POSTGRES_PASSWORD"),
+		os.Getenv("POSTGRES_DB"), "disable",
 	)
 
 	if err != nil {
 		suite.T().Fatal("Can't create NewDB", err)
 	}
 
-	redisClient, err := redisrepo.NewRedisClient(os.Getenv("REDIS_HOST"), os.Getenv("REDIS_PORT"))
+	redisClient, err := redisrepo.NewRedisClient(
+		os.Getenv("REDIS_HOST"), os.Getenv("REDIS_PORT"),
+	)
 
 	if err != nil {
 		suite.T().Fatal("Can't create NewDB", err)
@@ -137,13 +143,18 @@ func (suite *TestingSuite) SetupSuite() {
 	listRepo := postgres.NewPostgresListRepository(db)
 	tokenRepo := redisrepo.NewRedisRepository(redisClient)
 	userService := service.NewUserService(repo)
-	tokenService := service.NewTokenService(accessKey, refreshKey, maxLoggenInCount, tokenRepo)
+	tokenService := service.NewTokenService(
+		accessKey, refreshKey, maxLoggenInCount, tokenRepo,
+	)
 	listService := service.NewListService(listRepo)
 	msObj := new(mocks.MailService)
 	msObj.On("SendConfirmationsEmail", mock.Anything).Return(nil)
 	logger := logrus.New()
 	logger.Out = ioutil.Discard
-	suite.router = handler.New(userService, msObj, tokenService, listService, logger).InitRoutes(gin.TestMode)
+	suite.router = handler.New(
+		userService, msObj,
+		tokenService, listService,
+		logger).InitRoutes(gin.TestMode)
 }
 
 func TestSuite(t *testing.T) {

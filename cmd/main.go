@@ -41,7 +41,10 @@ func main() {
 	userService := service.NewUserService(userRepo)
 	mailService := service.NewMailService(cfg.Email, cfg.EmailPassword, cfg.Domain)
 	listService := service.NewListService(listRepo)
-	tokenService := service.NewTokenService(cfg.AccessKey, cfg.RefreshKey, cfg.MaxLoggedIn, tokenRepo)
+	tokenService := service.NewTokenService(
+		cfg.AccessKey, cfg.RefreshKey,
+		cfg.MaxLoggedIn, tokenRepo,
+	)
 
 	logger := logrus.New()
 	logger.SetFormatter(&logrus.JSONFormatter{})

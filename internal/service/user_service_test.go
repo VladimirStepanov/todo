@@ -162,7 +162,8 @@ func TestSignIn(t *testing.T) {
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
 			repoMock := new(mocks.UserRepository)
-			repoMock.On("FindUserByEmail", mock.AnythingOfType("string")).Return(tc.repoRetUser(), tc.repoRetErr)
+			repoMock.On("FindUserByEmail", mock.AnythingOfType("string")).
+				Return(tc.repoRetUser(), tc.repoRetErr)
 			us := NewUserService(repoMock)
 
 			u, err := us.SignIn(testEmail, tc.password)

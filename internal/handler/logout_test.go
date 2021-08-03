@@ -136,7 +136,10 @@ func TestLogout(t *testing.T) {
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
 			tsObj := new(mocks.TokenService)
-			tsObj.On("Verify", mock.Anything).Return(tc.verifyRetUserID, tc.verifyRetUserUUID, tc.verifyRerErr)
+			tsObj.On("Verify", mock.Anything).Return(
+				tc.verifyRetUserID, tc.verifyRetUserUUID, tc.verifyRerErr,
+			)
+
 			tsObj.On("Logout", mock.Anything, mock.Anything).Return(tc.logoutRetErr)
 
 			handler := New(nil, nil, tsObj, nil, getTestLogger())

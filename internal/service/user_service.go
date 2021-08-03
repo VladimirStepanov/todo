@@ -21,7 +21,12 @@ func (us *UserService) Create(Email, Password string) (*models.User, error) {
 	}
 	link := uuid.NewString()
 
-	user := &models.User{Email: Email, Password: string(hashedPassword), ActivatedLink: link}
+	user := &models.User{
+		Email:         Email,
+		Password:      string(hashedPassword),
+		ActivatedLink: link,
+	}
+
 	return us.repo.Create(user)
 }
 

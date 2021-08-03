@@ -21,7 +21,8 @@ func (pr *PostgresUserRepository) Create(user *models.User) (*models.User, error
 	var insertedID int64
 
 	err := pr.DB.QueryRow(
-		"INSERT INTO users(email, password_hash, activated_link) values($1, $2, $3) RETURNING id",
+		`INSERT INTO users(email, password_hash, activated_link) 
+		 VALUES($1, $2, $3) RETURNING id`,
 		user.Email, user.Password, user.ActivatedLink,
 	).Scan(&insertedID)
 
@@ -38,7 +39,9 @@ func (pr *PostgresUserRepository) Create(user *models.User) (*models.User, error
 }
 
 func (pr *PostgresUserRepository) ConfirmEmail(Link string) error {
-	res, err := pr.DB.Exec("UPDATE users SET is_activated=TRUE WHERE activated_link=$1 AND is_activated=FALSE", Link)
+	res, err := pr.DB.Exec(
+		`UPDATE users SET is_activated=TRUE 
+		 WHERE activated_link=$1 AND is_activated=FALSE`, Link)
 	if err != nil {
 		return err
 	}

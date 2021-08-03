@@ -67,9 +67,15 @@ func TestListCreate(t *testing.T) {
 
 	for _, tc := range tests {
 		ls := new(mocks.ListService)
-		ls.On("Create", mock.Anything, mock.Anything, mock.Anything).Return(tc.createRetID, tc.createRetErr)
+		ls.On("Create", mock.Anything, mock.Anything, mock.Anything).Return(
+			tc.createRetID, tc.createRetErr,
+		)
+
 		tsObj := new(mocks.TokenService)
-		tsObj.On("Verify", mock.Anything).Return(tc.verifyRetUserID, tc.verifyRetUserUUID, tc.verifyRerErr)
+		tsObj.On("Verify", mock.Anything).Return(
+			tc.verifyRetUserID, tc.verifyRetUserUUID, tc.verifyRerErr,
+		)
+
 		handler := New(nil, nil, tsObj, ls, getTestLogger())
 		r := handler.InitRoutes(gin.TestMode)
 		code, data := helpers.MakeRequest(
@@ -166,7 +172,10 @@ func TestGetListByID(t *testing.T) {
 		ls := new(mocks.ListService)
 		ls.On("GetListByID", mock.Anything, mock.Anything).Return(tc.getRetList, tc.getRetErr)
 		tsObj := new(mocks.TokenService)
-		tsObj.On("Verify", mock.Anything).Return(tc.verifyRetUserID, tc.verifyRetUserUUID, tc.verifyRerErr)
+		tsObj.On("Verify", mock.Anything).Return(
+			tc.verifyRetUserID, tc.verifyRetUserUUID,
+			tc.verifyRerErr,
+		)
 		handler := New(nil, nil, tsObj, ls, getTestLogger())
 		r := handler.InitRoutes(gin.TestMode)
 		code, data := helpers.MakeRequest(

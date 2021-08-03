@@ -130,7 +130,10 @@ func (ts *TokenService) verify(token, key, prefix string) (jwt.MapClaims, error)
 		return nil, err
 	}
 
-	redisKey := fmt.Sprintf("%s:%d:%s", prefix, int64(claims["user_id"].(float64)), claims["uuid"].(string))
+	redisKey := fmt.Sprintf(
+		"%s:%d:%s", prefix, int64(claims["user_id"].(float64)), claims["uuid"].(string),
+	)
+
 	val, err := ts.repo.Get(redisKey)
 
 	if err != nil {
@@ -149,8 +152,13 @@ func (ts *TokenService) Refresh(refreshToken string) (*models.TokenDetails, erro
 		return nil, err
 	}
 
-	accessRedisKey := fmt.Sprintf("a:%d:%s", int64(claims["user_id"].(float64)), claims["uuid"].(string))
-	refreshRedisKey := fmt.Sprintf("r:%d:%s", int64(claims["user_id"].(float64)), claims["uuid"].(string))
+	accessRedisKey := fmt.Sprintf(
+		"a:%d:%s", int64(claims["user_id"].(float64)), claims["uuid"].(string),
+	)
+
+	refreshRedisKey := fmt.Sprintf(
+		"r:%d:%s", int64(claims["user_id"].(float64)), claims["uuid"].(string),
+	)
 
 	err = ts.repo.Delete(refreshRedisKey, accessRedisKey)
 	if err != nil {

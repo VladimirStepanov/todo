@@ -44,7 +44,8 @@ func TestListCreate(t *testing.T) {
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
 			lr := new(mocks.ListRepository)
-			lr.On("Create", mock.Anything, mock.Anything, mock.Anything).Return(tc.idRet, tc.expErr)
+			lr.On("Create", mock.Anything, mock.Anything, mock.Anything).
+				Return(tc.idRet, tc.expErr)
 
 			ls := NewListService(lr)
 

@@ -129,7 +129,10 @@ func (suite *TestingSuite) TestEmailConfirmation() {
 
 func (suite *TestingSuite) TestSignIn() {
 
-	input := fmt.Sprintf(`{"email": "%s", "password": "%s"}`, maxLoggedInUser.Email, defaultPassword)
+	input := fmt.Sprintf(
+		`{"email": "%s", "password": "%s"}`,
+		maxLoggedInUser.Email, defaultPassword,
+	)
 
 	for i := 0; i < maxLoggenInCount; i++ {
 		code, _ := helpers.MakeRequest(
@@ -150,26 +153,38 @@ func (suite *TestingSuite) TestSignIn() {
 		errMsg string
 	}{
 		{
-			name:   "Max logged in users",
-			input:  fmt.Sprintf(`{"email": "%s", "password": "%s"}`, maxLoggedInUser.Email, defaultPassword),
+			name: "Max logged in users",
+			input: fmt.Sprintf(
+				`{"email": "%s", "password": "%s"}`,
+				maxLoggedInUser.Email, defaultPassword,
+			),
 			code:   http.StatusForbidden,
 			errMsg: models.ErrMaxLoggedIn.Error(),
 		},
 		{
-			name:   "Check ErrBadUser error",
-			input:  fmt.Sprintf(`{"email": "%s", "password": "%s"}`, "bad@user.com", defaultPassword),
+			name: "Check ErrBadUser error",
+			input: fmt.Sprintf(
+				`{"email": "%s", "password": "%s"}`,
+				"bad@user.com", defaultPassword,
+			),
 			code:   http.StatusNotFound,
 			errMsg: models.ErrBadUser.Error(),
 		},
 		{
-			name:   "Check ErrUserNotActivated error",
-			input:  fmt.Sprintf(`{"email": "%s", "password": "%s"}`, authNotConfirmedUser.Email, defaultPassword),
+			name: "Check ErrUserNotActivated error",
+			input: fmt.Sprintf(
+				`{"email": "%s", "password": "%s"}`,
+				authNotConfirmedUser.Email, defaultPassword,
+			),
 			code:   http.StatusForbidden,
 			errMsg: models.ErrUserNotActivated.Error(),
 		},
 		{
-			name:   "Success auth",
-			input:  fmt.Sprintf(`{"email": "%s", "password": "%s"}`, authUser.Email, defaultPassword),
+			name: "Success auth",
+			input: fmt.Sprintf(
+				`{"email": "%s", "password": "%s"}`,
+				authUser.Email, defaultPassword,
+			),
 			code:   http.StatusOK,
 			errMsg: "",
 		},
@@ -202,7 +217,10 @@ func (suite *TestingSuite) TestSignIn() {
 func (suite *TestingSuite) TestRefresh() {
 	inputF := `{"refresh_token": "%s"}`
 
-	siginInput := fmt.Sprintf(`{"email": "%s", "password": "%s"}`, authUser.Email, defaultPassword)
+	siginInput := fmt.Sprintf(
+		`{"email": "%s", "password": "%s"}`,
+		authUser.Email, defaultPassword,
+	)
 	code, data := helpers.MakeRequest(
 		suite.router,
 		suite.T(),

@@ -26,7 +26,10 @@ func (ms *MailService) SendConfirmationsEmail(user *models.User) error {
 	msg := "From: " + from + "\n" +
 		"To: " + to + "\n" +
 		"Subject: Email conficmation\n\n" +
-		fmt.Sprintf("Confirm your email: http://%s/auth/confirm/%s", ms.Domain, user.ActivatedLink)
+		fmt.Sprintf(
+			"Confirm your email: http://%s/auth/confirm/%s",
+			ms.Domain, user.ActivatedLink,
+		)
 
 	return smtp.SendMail(strings.Join([]string{server, port}, ":"),
 		smtp.PlainAuth("", from, pass, server),

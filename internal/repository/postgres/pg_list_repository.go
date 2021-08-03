@@ -65,7 +65,9 @@ func (ls *PostgresListRepository) GetListByID(listID, userID int64) (*models.Lis
 
 	err := ls.DB.Get(
 		res,
-		"SELECT id, title, description FROM lists l INNER JOIN users_lists ul on l.id = ul.list_id WHERE ul.user_id=$1 AND ul.list_id = $2;",
+		`SELECT id, title, description 
+		 FROM lists l INNER JOIN users_lists ul on l.id = ul.list_id 
+		 WHERE ul.user_id=$1 AND ul.list_id = $2;`,
 		userID, listID)
 	if err != nil {
 		if err == sql.ErrNoRows {

@@ -197,8 +197,11 @@ func TestRefresh(t *testing.T) {
 			repoMock := new(mocks.TokenRepository)
 			repoMock.On("Get", mock.Anything).Return(tc.getRetVal, tc.getRetErr)
 			repoMock.On("Delete", mock.Anything, mock.Anything).Return(tc.delRetErr)
-			repoMock.On("Count", mock.Anything).Return(tc.countRetVal, tc.countRetErr)
-			repoMock.On("SetTokens", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(tc.setTokensRetErr)
+			repoMock.On("Count", mock.Anything).
+				Return(tc.countRetVal, tc.countRetErr)
+			repoMock.On("SetTokens", mock.Anything, mock.Anything, mock.Anything, mock.Anything).
+				Return(tc.setTokensRetErr)
+
 			ts := NewTokenService(accessKey, refreshKey, maxLoggenIn, repoMock)
 
 			td, err := ts.Refresh(tc.token)
@@ -310,6 +313,7 @@ func TestLogout(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			repoMock := new(mocks.TokenRepository)
 			repoMock.On("Delete", mock.Anything, mock.Anything).Return(tc.delRetErr)
+
 			ts := NewTokenService(accessKey, refreshKey, maxLoggenIn, repoMock)
 			err := ts.Logout(1, "hello")
 			require.Equal(t, tc.expErr, err)

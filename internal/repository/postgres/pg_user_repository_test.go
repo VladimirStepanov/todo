@@ -53,7 +53,9 @@ func TestUserCreate(t *testing.T) {
 		{
 			name: "Return user already exists",
 			setMock: func(m sqlmock.Sqlmock, e error) {
-				m.ExpectQuery("INSERT INTO users").WithArgs(testUser.Email, testUser.Password, testUser.ActivatedLink).WillReturnError(e)
+				m.ExpectQuery("INSERT INTO users").
+					WithArgs(testUser.Email, testUser.Password, testUser.ActivatedLink).
+					WillReturnError(e)
 			},
 			retErr: &pq.Error{Code: "23505"},
 			expErr: models.ErrUserAlreadyExists,
@@ -118,7 +120,8 @@ func TestConfirmEmail(t *testing.T) {
 		{
 			name: "Zero rows affected error",
 			setMock: func(m sqlmock.Sqlmock, e error) {
-				mock.ExpectExec("UPDATE users").WillReturnResult(sqlmock.NewResult(0, 0))
+				mock.ExpectExec("UPDATE users").
+					WillReturnResult(sqlmock.NewResult(0, 0))
 			},
 			retErr: nil,
 			expErr: models.ErrConfirmLinkNotExists,
@@ -126,7 +129,8 @@ func TestConfirmEmail(t *testing.T) {
 		{
 			name: "Success confirm",
 			setMock: func(m sqlmock.Sqlmock, e error) {
-				mock.ExpectExec("UPDATE users").WillReturnResult(sqlmock.NewResult(1, 1))
+				mock.ExpectExec("UPDATE users").
+					WillReturnResult(sqlmock.NewResult(1, 1))
 			},
 			retErr: nil,
 			expErr: nil,
@@ -190,7 +194,13 @@ func TestFindUserByEmail(t *testing.T) {
 			setMock: func(m sqlmock.Sqlmock, e error) {
 				rows := sqlmock.NewRows(
 					[]string{"id", "email", "password_hash", "is_activated", "activated_link"},
-				).AddRow(retID, testUser.Email, testUser.Password, testUser.IsActivated, testUser.ActivatedLink)
+				).AddRow(
+					retID, testUser.Email,
+					testUser.Password,
+					testUser.IsActivated,
+					testUser.ActivatedLink,
+				)
+
 				m.ExpectQuery("SELECT (.+) FROM users").
 					WithArgs(testUser.Email).
 					WillReturnRows(rows)
