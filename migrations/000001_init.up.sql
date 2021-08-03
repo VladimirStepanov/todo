@@ -13,15 +13,18 @@ create table lists (
 );
 
 create table users_lists (
-    user_id integer references users(id),
-    list_id integer references lists(id),
-    is_admin bool default false
+    user_id integer not null,
+    list_id integer not null,
+    is_admin bool default false,
+    CONSTRAINT fk_users_id FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE,
+    CONSTRAINT fk_lists_id FOREIGN KEY(list_id) REFERENCES lists(id) ON DELETE CASCADE
 );
 
 create table items (
     id serial primary key,
-    list_id integer references lists(id),
+    list_id integer not null,
     title varchar(255) not null,
     description text not null,
-    done bool default false
+    done bool default false,
+    CONSTRAINT fk_lists_id FOREIGN KEY(list_id) REFERENCES lists(id) ON DELETE CASCADE
 );
