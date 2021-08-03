@@ -75,6 +75,13 @@ var maxLoggedInUser = &models.User{
 	ActivatedLink: "auth",
 }
 
+var createListUser = &models.User{
+	Email:         "createListUser@mail.ru",
+	Password:      defaultSalt,
+	IsActivated:   true,
+	ActivatedLink: "createListUser",
+}
+
 var dataForInsert = []*models.User{
 	userForCreate,
 	notConfirmedUser,
@@ -82,6 +89,7 @@ var dataForInsert = []*models.User{
 	authUser,
 	maxLoggedInUser,
 	authNotConfirmedUser,
+	createListUser,
 }
 
 var (
