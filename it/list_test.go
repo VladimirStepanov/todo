@@ -39,7 +39,7 @@ func createList(t *testing.T, r http.Handler, input string, headers map[string]s
 	return crResp.ListID
 }
 
-func (suite *TestingSuite) TestCreateAndGetList() {
+func (suite *TestingSuite) TestGetListByID() {
 	listInput := fmt.Sprintf(
 		`{"title": "%s", "description": "%s"}`,
 		listForCreate.Title, listForCreate.Description,
@@ -57,22 +57,56 @@ func (suite *TestingSuite) TestCreateAndGetList() {
 
 	listID := createList(suite.T(), suite.router, listInput, headers)
 
-	code, listGetData := helpers.MakeRequest(
-		suite.router,
-		suite.T(),
-		http.MethodGet,
-		fmt.Sprintf("/api/lists/%d", listID),
-		bytes.NewBuffer([]byte{}),
-		headers,
-	)
-	require.Equal(suite.T(), http.StatusOK, code)
+	tests := []struct {
+		name        string
+		code        int
+		inputListID int64
+		expErrMsg   string
+		expList     *models.List
+	}{
+		{
+			name:        "List not found",
+			code:        http.StatusNotFound,
+			inputListID: 100000,
+			expErrMsg:   models.ErrNoList.Error(),
+			expList:     nil,
+		},
+		{
+			name:        "Success get",
+			code:        http.StatusOK,
+			inputListID: listID,
+			expErrMsg:   "",
+			expList:     listForCreate,
+		},
+	}
 
-	userList := &models.List{}
-	err := json.Unmarshal(listGetData, userList)
-	require.NoError(suite.T(), err)
+	for _, tc := range tests {
+		suite.T().Run(tc.name, func(t *testing.T) {
+			code, listGetData := helpers.MakeRequest(
+				suite.router,
+				t,
+				http.MethodGet,
+				fmt.Sprintf("/api/lists/%d", tc.inputListID),
+				bytes.NewBuffer([]byte{}),
+				headers,
+			)
 
-	require.Equal(suite.T(), listForCreate.Title, userList.Title)
-	require.Equal(suite.T(), listForCreate.Description, userList.Description)
+			require.Equal(t, tc.code, code)
+
+			if tc.expErrMsg != "" {
+				errResp := &handler.ErrorResponse{}
+				err := json.Unmarshal(listGetData, errResp)
+				require.NoError(t, err)
+				require.Equal(t, tc.expErrMsg, errResp.Message)
+			} else {
+				userList := &models.List{}
+				err := json.Unmarshal(listGetData, userList)
+				require.NoError(t, err)
+				require.Equal(t, tc.expList.Title, userList.Title)
+				require.Equal(t, tc.expList.Description, userList.Description)
+			}
+		})
+	}
 
 	makeLogout(suite.T(), suite.router, authResp)
 }
