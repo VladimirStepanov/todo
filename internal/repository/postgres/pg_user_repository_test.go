@@ -112,7 +112,8 @@ func TestConfirmEmail(t *testing.T) {
 		{
 			name: "Return unknown error",
 			setMock: func(m sqlmock.Sqlmock, e error) {
-				m.ExpectExec("UPDATE users").WithArgs("link").WillReturnError(e)
+				m.ExpectExec("UPDATE users").
+					WithArgs("link").WillReturnError(e)
 			},
 			retErr: ErrUnknown,
 			expErr: ErrUnknown,

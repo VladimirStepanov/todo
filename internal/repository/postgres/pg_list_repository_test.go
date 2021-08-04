@@ -53,7 +53,9 @@ func TestCreate(t *testing.T) {
 			name: "QueryRow return error",
 			setMock: func(m sqlmock.Sqlmock, e error) {
 				m.ExpectBegin()
-				m.ExpectQuery("INSERT INTO lists").WithArgs("title", "description").WillReturnError(e)
+				m.ExpectQuery("INSERT INTO lists").
+					WithArgs("title", "description").
+					WillReturnError(e)
 				m.ExpectRollback()
 			},
 			retErr: ErrUnknown,
@@ -65,8 +67,13 @@ func TestCreate(t *testing.T) {
 			setMock: func(m sqlmock.Sqlmock, e error) {
 				m.ExpectBegin()
 				rows := sqlmock.NewRows([]string{"id"}).AddRow(1)
-				m.ExpectQuery("INSERT INTO lists").WithArgs("title", "description").WillReturnRows(rows)
-				m.ExpectExec("INSERT INTO users_lists").WithArgs(1, 1, true).WillReturnError(e)
+				m.ExpectQuery("INSERT INTO lists").
+					WithArgs("title", "description").
+					WillReturnRows(rows)
+
+				m.ExpectExec("INSERT INTO users_lists").
+					WithArgs(1, 1, true).
+					WillReturnError(e)
 				m.ExpectRollback()
 			},
 			retErr: ErrUnknown,
