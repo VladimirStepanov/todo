@@ -197,3 +197,80 @@ func TestGetListByID(t *testing.T) {
 		})
 	}
 }
+
+func TestIsListAdmin(t *testing.T) {
+	mockDB, mock, err := sqlmock.New()
+
+	if err != nil {
+		t.Fatal("Error while sqlmock.New()", err)
+	}
+
+	defer mockDB.Close()
+
+	db := sqlx.NewDb(mockDB, "sqlmock")
+
+	lr := NewPostgresListRepository(db)
+
+	tests := []struct {
+		name    string
+		setMock func(m sqlmock.Sqlmock, e error)
+		retErr  error
+		expErr  error
+	}{
+		{
+			name: "Return unknown error",
+			setMock: func(m sqlmock.Sqlmock, e error) {
+				m.ExpectQuery("SELECT user_id, list_id, is_admin FROM users_lists").
+					WithArgs(testList.ID, 1).
+					WillReturnError(e)
+			},
+			retErr: ErrUnknown,
+			expErr: ErrUnknown,
+		},
+		{
+			name: "List not found",
+			setMock: func(m sqlmock.Sqlmock, e error) {
+				m.ExpectQuery("SELECT user_id, list_id, is_admin FROM users_lists").
+					WithArgs(testList.ID, 1).
+					WillReturnError(e)
+			},
+			retErr: sql.ErrNoRows,
+			expErr: models.ErrNoList,
+		},
+		{
+			name: "Access error",
+			setMock: func(m sqlmock.Sqlmock, e error) {
+				rows := sqlmock.NewRows(
+					[]string{"list_id", "user_id", "is_admin"},
+				).AddRow(1, 1, false)
+				m.ExpectQuery("SELECT user_id, list_id, is_admin FROM users_lists").
+					WithArgs(testList.ID, 1).
+					WillReturnRows(rows)
+			},
+			retErr: nil,
+			expErr: models.ErrNoListAccess,
+		},
+		{
+			name: "Success check",
+			setMock: func(m sqlmock.Sqlmock, e error) {
+				rows := sqlmock.NewRows(
+					[]string{"list_id", "user_id", "is_admin"},
+				).AddRow(1, 1, true)
+				m.ExpectQuery("SELECT user_id, list_id, is_admin FROM users_lists").
+					WithArgs(testList.ID, 1).
+					WillReturnRows(rows)
+			},
+			retErr: nil,
+			expErr: nil,
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			tc.setMock(mock, tc.retErr)
+
+			err := lr.IsListAdmin(testList.ID, 1)
+			require.Equal(t, tc.expErr, err)
+		})
+	}
+}

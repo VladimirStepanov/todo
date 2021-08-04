@@ -56,6 +56,28 @@ func (ls *PostgresListRepository) Create(title, description string, userID int64
 	return listID, nil
 }
 
+func (ls *PostgresListRepository) IsListAdmin(ListID, userID int64) error {
+	us := &models.UsersList{}
+
+	err := ls.DB.Get(
+		us,
+		`SELECT user_id, list_id, is_admin 
+		 FROM users_lists WHERE user_id=$1 AND list_id=$2`,
+		userID, ListID,
+	)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			err = models.ErrNoList
+		}
+		return err
+	}
+
+	if !us.IsAdmin {
+		return models.ErrNoListAccess
+	}
+	return nil
+}
+
 func (ls *PostgresListRepository) GrantRole(listID, fromUser, toUserID int64, role bool) error {
 	return nil
 }
