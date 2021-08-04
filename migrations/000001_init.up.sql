@@ -17,7 +17,8 @@ create table users_lists (
     list_id integer not null,
     is_admin bool default false,
     CONSTRAINT fk_users_id FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE,
-    CONSTRAINT fk_lists_id FOREIGN KEY(list_id) REFERENCES lists(id) ON DELETE CASCADE
+    CONSTRAINT fk_lists_id FOREIGN KEY(list_id) REFERENCES lists(id) ON DELETE CASCADE,
+    CONSTRAINT pk_users_lists PRIMARY KEY(user_id, list_id)
 );
 
 create table items (
