@@ -107,6 +107,20 @@ func (_m *ListRepository) GrantRole(listID int64, fromUser int64, toUserID int64
 	return r0
 }
 
+// IsListAdmin provides a mock function with given fields: ListID, userID
+func (_m *ListRepository) IsListAdmin(ListID int64, userID int64) error {
+	ret := _m.Called(ListID, userID)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(int64, int64) error); ok {
+		r0 = rf(ListID, userID)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
 // Update provides a mock function with given fields: userID, list
 func (_m *ListRepository) Update(userID int64, list *models.List) error {
 	ret := _m.Called(userID, list)
