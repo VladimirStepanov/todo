@@ -26,7 +26,7 @@ func TestRefresh(t *testing.T) {
 			name:     "Return bad token error",
 			tsRetErr: models.ErrBadToken,
 			tsRetTd:  nil,
-			code:     http.StatusForbidden,
+			code:     http.StatusBadRequest,
 			errMsg:   models.ErrBadToken.Error(),
 		},
 		{

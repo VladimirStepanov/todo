@@ -22,7 +22,7 @@ func (h *Handler) refreshToken(c *gin.Context) {
 	if err != nil {
 		switch err {
 		case models.ErrBadToken:
-			c.JSON(http.StatusForbidden, gin.H{
+			c.JSON(http.StatusBadRequest, gin.H{
 				"status":  "error",
 				"message": err.Error(),
 			})

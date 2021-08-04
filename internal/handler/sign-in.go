@@ -23,7 +23,7 @@ func (h *Handler) signIn(c *gin.Context) {
 				"message": err.Error(),
 			})
 		case models.ErrUserNotActivated:
-			c.JSON(http.StatusForbidden, gin.H{
+			c.JSON(http.StatusUnauthorized, gin.H{
 				"status":  "error",
 				"message": err.Error(),
 			})
@@ -37,7 +37,7 @@ func (h *Handler) signIn(c *gin.Context) {
 	if err != nil {
 		switch err {
 		case models.ErrMaxLoggedIn:
-			c.JSON(http.StatusForbidden, gin.H{
+			c.JSON(http.StatusUnprocessableEntity, gin.H{
 				"status":  "error",
 				"message": err.Error(),
 			})

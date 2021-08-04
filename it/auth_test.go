@@ -176,7 +176,7 @@ func (suite *TestingSuite) TestSignIn() {
 				`{"email": "%s", "password": "%s"}`,
 				maxLoggedInUser.Email, defaultPassword,
 			),
-			code:   http.StatusForbidden,
+			code:   http.StatusUnprocessableEntity,
 			errMsg: models.ErrMaxLoggedIn.Error(),
 		},
 		{
@@ -194,7 +194,7 @@ func (suite *TestingSuite) TestSignIn() {
 				`{"email": "%s", "password": "%s"}`,
 				authNotConfirmedUser.Email, defaultPassword,
 			),
-			code:   http.StatusForbidden,
+			code:   http.StatusUnauthorized,
 			errMsg: models.ErrUserNotActivated.Error(),
 		},
 		{
@@ -263,7 +263,7 @@ func (suite *TestingSuite) TestRefresh() {
 			input: func() string {
 				return fmt.Sprintf(inputF, "bad.bad.bad")
 			},
-			code:   http.StatusForbidden,
+			code:   http.StatusBadRequest,
 			errMsg: models.ErrBadToken.Error(),
 		},
 		{

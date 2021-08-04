@@ -32,7 +32,7 @@ func TestLogout(t *testing.T) {
 			verifyRetUserUUID: "",
 			verifyRerErr:      nil,
 			logoutRetErr:      nil,
-			code:              http.StatusUnauthorized,
+			code:              http.StatusBadRequest,
 			errMsg:            models.ErrNoAuthHeader.Error(),
 		},
 		{
@@ -44,7 +44,7 @@ func TestLogout(t *testing.T) {
 			verifyRetUserUUID: "",
 			verifyRerErr:      nil,
 			logoutRetErr:      nil,
-			code:              http.StatusUnauthorized,
+			code:              http.StatusBadRequest,
 			errMsg:            models.ErrInvalidAuthHeader.Error(),
 		},
 		{
@@ -56,7 +56,7 @@ func TestLogout(t *testing.T) {
 			verifyRetUserUUID: "",
 			verifyRerErr:      nil,
 			logoutRetErr:      nil,
-			code:              http.StatusUnauthorized,
+			code:              http.StatusBadRequest,
 			errMsg:            models.ErrInvalidAuthHeader.Error(),
 		},
 		{
@@ -68,7 +68,7 @@ func TestLogout(t *testing.T) {
 			verifyRetUserUUID: "",
 			verifyRerErr:      models.ErrBadToken,
 			logoutRetErr:      nil,
-			code:              http.StatusForbidden,
+			code:              http.StatusBadRequest,
 			errMsg:            models.ErrBadToken.Error(),
 		},
 		{

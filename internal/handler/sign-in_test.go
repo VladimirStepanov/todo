@@ -41,7 +41,7 @@ func TestSignIn(t *testing.T) {
 			usRetErr:  models.ErrUserNotActivated,
 			tsRetErr:  nil,
 			tsRetTd:   nil,
-			code:      http.StatusForbidden,
+			code:      http.StatusUnauthorized,
 			errMsg:    models.ErrUserNotActivated.Error(),
 		},
 		{
@@ -68,7 +68,7 @@ func TestSignIn(t *testing.T) {
 			usRetErr:  nil,
 			tsRetErr:  models.ErrMaxLoggedIn,
 			tsRetTd:   nil,
-			code:      http.StatusForbidden,
+			code:      http.StatusUnprocessableEntity,
 			errMsg:    models.ErrMaxLoggedIn.Error(),
 		},
 		{

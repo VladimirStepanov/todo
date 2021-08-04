@@ -16,7 +16,7 @@ var (
 func (h *Handler) authMiddleware(c *gin.Context) {
 	header := c.GetHeader("Authorization")
 	if header == "" {
-		c.JSON(http.StatusUnauthorized, gin.H{
+		c.JSON(http.StatusBadRequest, gin.H{
 			"status":  "error",
 			"message": models.ErrNoAuthHeader.Error(),
 		})
@@ -27,7 +27,7 @@ func (h *Handler) authMiddleware(c *gin.Context) {
 	headerParts := strings.Split(header, " ")
 
 	if len(headerParts) != 2 || headerParts[0] != "Bearer" {
-		c.JSON(http.StatusUnauthorized, gin.H{
+		c.JSON(http.StatusBadRequest, gin.H{
 			"status":  "error",
 			"message": models.ErrInvalidAuthHeader.Error(),
 		})
@@ -40,7 +40,7 @@ func (h *Handler) authMiddleware(c *gin.Context) {
 	if err != nil {
 		switch err {
 		case models.ErrBadToken:
-			c.JSON(http.StatusForbidden, gin.H{
+			c.JSON(http.StatusBadRequest, gin.H{
 				"status":  "error",
 				"message": err.Error(),
 			})
