@@ -100,3 +100,44 @@ func TestListGetByID(t *testing.T) {
 		})
 	}
 }
+
+func TestIsListAdmin(t *testing.T) {
+	tests := []struct {
+		name   string
+		retErr error
+		expErr error
+	}{
+		{
+			name:   "Return unknown error",
+			retErr: ErrSome,
+			expErr: ErrSome,
+		},
+		{
+			name:   "List not found",
+			retErr: models.ErrNoList,
+			expErr: models.ErrNoList,
+		},
+		{
+			name:   "No access",
+			retErr: models.ErrNoListAccess,
+			expErr: models.ErrNoListAccess,
+		},
+		{
+			name:   "Success admin access",
+			retErr: nil,
+			expErr: nil,
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			lr := new(mocks.ListRepository)
+			lr.On("IsListAdmin", mock.Anything, mock.Anything).Return(tc.retErr)
+
+			ls := NewListService(lr)
+
+			err := ls.IsListAdmin(1, 1)
+			require.Equal(t, tc.expErr, err)
+		})
+	}
+}

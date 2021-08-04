@@ -39,6 +39,7 @@ type ListService interface {
 	GetUserLists(userID int64) ([]*List, error)
 	Delete(listID, userID int64) error
 	Update(userID int64, list *List) error
+	IsListAdmin(ListID, userID int64) error
 }
 
 type ListRepository interface {
