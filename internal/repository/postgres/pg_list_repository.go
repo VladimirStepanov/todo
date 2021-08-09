@@ -5,6 +5,7 @@ import (
 
 	"github.com/VladimirStepanov/todo-app/internal/models"
 	"github.com/jmoiron/sqlx"
+	"github.com/lib/pq"
 )
 
 type PostgresListRepository struct {
@@ -113,6 +114,11 @@ func (ls *PostgresListRepository) EditRole(listID, userID int64, role bool) erro
 		)
 
 		if err != nil {
+			if pgErr, ok := err.(*pq.Error); ok {
+				if pgErr.Code.Name() == "foreign_key_violation" {
+					err = models.ErrUserNotFound
+				}
+			}
 			if e := tx.Rollback(); e != nil {
 				return e
 			}

@@ -8,6 +8,7 @@ import (
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/VladimirStepanov/todo-app/internal/models"
 	"github.com/jmoiron/sqlx"
+	"github.com/lib/pq"
 	"github.com/stretchr/testify/require"
 )
 
@@ -333,6 +334,22 @@ func TestEditRole(t *testing.T) {
 			},
 			retErr: ErrUnknown,
 			expErr: ErrUnknown,
+		},
+		{
+			name: "Insert foreign key error",
+			setMock: func(m sqlmock.Sqlmock, e error) {
+				m.ExpectBegin()
+				m.ExpectExec("UPDATE users_lists").
+					WithArgs(true, 1, testList.ID).
+					WillReturnResult(sqlmock.NewResult(0, 0))
+
+				m.ExpectExec("INSERT INTO users_lists").
+					WithArgs(1, testList.ID, true).
+					WillReturnError(e)
+				m.ExpectRollback()
+			},
+			retErr: &pq.Error{Code: "23503"},
+			expErr: models.ErrUserNotFound,
 		},
 		{
 			name: "Success grant role",
