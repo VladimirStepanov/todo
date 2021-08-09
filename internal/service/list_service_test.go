@@ -141,3 +141,34 @@ func TestIsListAdmin(t *testing.T) {
 		})
 	}
 }
+
+func TestGrantRole(t *testing.T) {
+	tests := []struct {
+		name   string
+		retErr error
+		expErr error
+	}{
+		{
+			name:   "Return unknown error",
+			retErr: ErrSome,
+			expErr: ErrSome,
+		},
+		{
+			name:   "Success grant role",
+			retErr: nil,
+			expErr: nil,
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			lr := new(mocks.ListRepository)
+			lr.On("GrantRole", mock.Anything, mock.Anything, mock.Anything).Return(tc.retErr)
+
+			ls := NewListService(lr)
+
+			err := ls.GrantRole(1, 1, true)
+			require.Equal(t, tc.expErr, err)
+		})
+	}
+}

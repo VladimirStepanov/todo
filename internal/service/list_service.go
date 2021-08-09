@@ -21,7 +21,7 @@ func (ls *ListService) IsListAdmin(ListID, userID int64) error {
 }
 
 func (ls *ListService) GrantRole(listID, userID int64, role bool) error {
-	return nil
+	return ls.repo.GrantRole(listID, userID, role)
 }
 
 func (ls *ListService) GetListByID(listID, userID int64) (*models.List, error) {
