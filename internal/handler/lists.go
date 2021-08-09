@@ -67,3 +67,33 @@ func (h *Handler) getListByID(c *gin.Context) {
 
 	c.JSON(http.StatusOK, userList)
 }
+
+type editRoleReq struct {
+	UserID  int64 `json:"user_id" binding:"required"`
+	IsAdmin bool  `json:"is_admin" binding:"required"`
+}
+
+func (h *Handler) editRole(c *gin.Context) {
+	var req editRoleReq
+	if ok := bindData(c, &req); !ok {
+		return
+	}
+
+	listID, _ := strconv.ParseInt(c.Param("list_id"), 10, 64)
+	err := h.ListService.EditRole(listID, req.UserID, req.IsAdmin)
+
+	if err != nil {
+		switch err {
+		case models.ErrUserNotFound:
+			c.JSON(http.StatusNotFound, gin.H{
+				"status":  "error",
+				"message": err.Error(),
+			})
+		default:
+			h.InternalError(c, err)
+		}
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"status": "success"})
+}

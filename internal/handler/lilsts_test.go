@@ -201,3 +201,108 @@ func TestGetListByID(t *testing.T) {
 		}
 	}
 }
+
+func TestEditRole(t *testing.T) {
+	headers := map[string]string{"Authorization": "Bearer token"}
+	input := `{"user_id": 1, "is_admin": true}`
+
+	tests := []struct {
+		name         string
+		code         int
+		paramListID  string
+		isListAdmRet error
+		editRoleRet  error
+		errMsg       string
+	}{
+		{
+			name:         "onlyAdminAccess parse error",
+			code:         http.StatusBadRequest,
+			paramListID:  "s",
+			isListAdmRet: nil,
+			errMsg:       models.ErrBadParam.Error(),
+		},
+		{
+			name:         "IsListAdmin  return ErrNoList",
+			code:         http.StatusNotFound,
+			paramListID:  "1",
+			isListAdmRet: models.ErrNoList,
+			errMsg:       models.ErrNoList.Error(),
+		},
+		{
+			name:         "IsListAdmin  return ErrNoListAccess",
+			code:         http.StatusForbidden,
+			paramListID:  "1",
+			isListAdmRet: models.ErrNoListAccess,
+			errMsg:       models.ErrNoListAccess.Error(),
+		},
+		{
+			name:         "IsListAdmin  return Internal error",
+			code:         http.StatusInternalServerError,
+			paramListID:  "1",
+			isListAdmRet: ErrUnknown,
+			errMsg:       "Internal server error",
+		},
+		{
+			name:         "EditRole return ErrUserNotFound",
+			code:         http.StatusNotFound,
+			paramListID:  "1",
+			isListAdmRet: nil,
+			editRoleRet:  models.ErrUserNotFound,
+			errMsg:       models.ErrUserNotFound.Error(),
+		},
+		{
+			name:         "EditRole return ErrUnknown",
+			code:         http.StatusInternalServerError,
+			paramListID:  "1",
+			isListAdmRet: nil,
+			editRoleRet:  ErrUnknown,
+			errMsg:       "Internal server error",
+		},
+		{
+			name:         "EditRole success",
+			code:         http.StatusOK,
+			paramListID:  "1",
+			isListAdmRet: nil,
+			editRoleRet:  nil,
+			errMsg:       "",
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			tsObj := new(mocks.TokenService)
+			tsObj.On("Verify", mock.Anything).Return(
+				int64(1), "aaa-aaa-aaa-aaa", nil,
+			)
+
+			ls := new(mocks.ListService)
+			ls.On("IsListAdmin", mock.Anything, mock.Anything).Return(
+				tc.isListAdmRet,
+			)
+			ls.On("EditRole", mock.Anything, mock.Anything, mock.Anything).Return(
+				tc.editRoleRet,
+			)
+
+			handler := New(nil, nil, tsObj, ls, getTestLogger())
+			r := handler.InitRoutes(gin.TestMode)
+			code, data := helpers.MakeRequest(
+				r,
+				t,
+				http.MethodPost,
+				fmt.Sprintf("/api/lists/%s/edit-role", tc.paramListID),
+				bytes.NewBuffer([]byte(input)),
+				headers,
+			)
+			require.Equal(t, tc.code, code)
+			actResp := map[string]interface{}{}
+			err := json.Unmarshal(data, &actResp)
+			require.NoError(t, err)
+			if tc.code != 200 {
+				require.Equal(t, "error", actResp["status"])
+				require.Equal(t, tc.errMsg, actResp["message"])
+			} else {
+				require.Equal(t, "success", actResp["status"])
+			}
+		})
+	}
+}
