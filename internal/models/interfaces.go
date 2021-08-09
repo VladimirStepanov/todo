@@ -34,7 +34,7 @@ type TokenRepository interface {
 
 type ListService interface {
 	Create(title, description string, userID int64) (int64, error)
-	GrantRole(listID, userID int64, role bool) error
+	EditRole(listID, userID int64, role bool) error
 	GetListByID(listID, userID int64) (*List, error)
 	GetUserLists(userID int64) ([]*List, error)
 	Delete(listID, userID int64) error
@@ -44,7 +44,7 @@ type ListService interface {
 
 type ListRepository interface {
 	Create(title, description string, userID int64) (int64, error)
-	GrantRole(listID, userID int64, role bool) error
+	EditRole(listID, userID int64, role bool) error
 	GetListByID(listID, userID int64) (*List, error)
 	GetUserLists(userID int64) ([]*List, error)
 	Delete(listID, userID int64) error

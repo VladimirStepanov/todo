@@ -275,7 +275,7 @@ func TestIsListAdmin(t *testing.T) {
 	}
 }
 
-func TestGrantRole(t *testing.T) {
+func TestEditRole(t *testing.T) {
 	mockDB, mock, err := sqlmock.New()
 
 	if err != nil {
@@ -356,7 +356,7 @@ func TestGrantRole(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			tc.setMock(mock, tc.retErr)
 
-			err := lr.GrantRole(testList.ID, 1, true)
+			err := lr.EditRole(testList.ID, 1, true)
 			require.Equal(t, tc.expErr, err)
 		})
 	}

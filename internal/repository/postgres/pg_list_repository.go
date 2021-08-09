@@ -78,7 +78,7 @@ func (ls *PostgresListRepository) IsListAdmin(ListID, userID int64) error {
 	return nil
 }
 
-func (ls *PostgresListRepository) GrantRole(listID, userID int64, role bool) error {
+func (ls *PostgresListRepository) EditRole(listID, userID int64, role bool) error {
 	tx, err := ls.DB.Beginx()
 	if err != nil {
 		return err

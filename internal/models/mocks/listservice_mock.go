@@ -47,6 +47,20 @@ func (_m *ListService) Delete(listID int64, userID int64) error {
 	return r0
 }
 
+// EditRole provides a mock function with given fields: listID, userID, role
+func (_m *ListService) EditRole(listID int64, userID int64, role bool) error {
+	ret := _m.Called(listID, userID, role)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(int64, int64, bool) error); ok {
+		r0 = rf(listID, userID, role)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
 // GetListByID provides a mock function with given fields: listID, userID
 func (_m *ListService) GetListByID(listID int64, userID int64) (*models.List, error) {
 	ret := _m.Called(listID, userID)
@@ -91,20 +105,6 @@ func (_m *ListService) GetUserLists(userID int64) ([]*models.List, error) {
 	}
 
 	return r0, r1
-}
-
-// GrantRole provides a mock function with given fields: listID, userID, role
-func (_m *ListService) GrantRole(listID int64, userID int64, role bool) error {
-	ret := _m.Called(listID, userID, role)
-
-	var r0 error
-	if rf, ok := ret.Get(0).(func(int64, int64, bool) error); ok {
-		r0 = rf(listID, userID, role)
-	} else {
-		r0 = ret.Error(0)
-	}
-
-	return r0
 }
 
 // IsListAdmin provides a mock function with given fields: ListID, userID

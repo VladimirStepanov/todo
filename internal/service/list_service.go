@@ -20,8 +20,8 @@ func (ls *ListService) IsListAdmin(ListID, userID int64) error {
 	return ls.repo.IsListAdmin(ListID, userID)
 }
 
-func (ls *ListService) GrantRole(listID, userID int64, role bool) error {
-	return ls.repo.GrantRole(listID, userID, role)
+func (ls *ListService) EditRole(listID, userID int64, role bool) error {
+	return ls.repo.EditRole(listID, userID, role)
 }
 
 func (ls *ListService) GetListByID(listID, userID int64) (*models.List, error) {

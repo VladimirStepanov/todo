@@ -142,7 +142,7 @@ func TestIsListAdmin(t *testing.T) {
 	}
 }
 
-func TestGrantRole(t *testing.T) {
+func TestEditRole(t *testing.T) {
 	tests := []struct {
 		name   string
 		retErr error
@@ -163,11 +163,11 @@ func TestGrantRole(t *testing.T) {
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
 			lr := new(mocks.ListRepository)
-			lr.On("GrantRole", mock.Anything, mock.Anything, mock.Anything).Return(tc.retErr)
+			lr.On("EditRole", mock.Anything, mock.Anything, mock.Anything).Return(tc.retErr)
 
 			ls := NewListService(lr)
 
-			err := ls.GrantRole(1, 1, true)
+			err := ls.EditRole(1, 1, true)
 			require.Equal(t, tc.expErr, err)
 		})
 	}
