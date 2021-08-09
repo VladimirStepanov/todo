@@ -66,37 +66,39 @@ func TestListCreate(t *testing.T) {
 	}
 
 	for _, tc := range tests {
-		ls := new(mocks.ListService)
-		ls.On("Create", mock.Anything, mock.Anything, mock.Anything).Return(
-			tc.createRetID, tc.createRetErr,
-		)
+		t.Run(tc.name, func(t *testing.T) {
+			ls := new(mocks.ListService)
+			ls.On("Create", mock.Anything, mock.Anything, mock.Anything).Return(
+				tc.createRetID, tc.createRetErr,
+			)
 
-		tsObj := new(mocks.TokenService)
-		tsObj.On("Verify", mock.Anything).Return(
-			tc.verifyRetUserID, tc.verifyRetUserUUID, tc.verifyRerErr,
-		)
+			tsObj := new(mocks.TokenService)
+			tsObj.On("Verify", mock.Anything).Return(
+				tc.verifyRetUserID, tc.verifyRetUserUUID, tc.verifyRerErr,
+			)
 
-		handler := New(nil, nil, tsObj, ls, getTestLogger())
-		r := handler.InitRoutes(gin.TestMode)
-		code, data := helpers.MakeRequest(
-			r,
-			t,
-			http.MethodPost,
-			"/api/lists",
-			bytes.NewBuffer([]byte(tc.input)),
-			tc.headers,
-		)
-		require.Equal(t, tc.code, code)
-		actResp := map[string]interface{}{}
-		err := json.Unmarshal(data, &actResp)
-		require.NoError(t, err)
-		if tc.code != 200 {
-			require.Equal(t, "error", actResp["status"])
-			require.Equal(t, tc.errMsg, actResp["message"])
-		} else {
-			require.Equal(t, "success", actResp["status"])
-			require.Equal(t, tc.expListID, int64(actResp["list_id"].(float64)))
-		}
+			handler := New(nil, nil, tsObj, ls, getTestLogger())
+			r := handler.InitRoutes(gin.TestMode)
+			code, data := helpers.MakeRequest(
+				r,
+				t,
+				http.MethodPost,
+				"/api/lists",
+				bytes.NewBuffer([]byte(tc.input)),
+				tc.headers,
+			)
+			require.Equal(t, tc.code, code)
+			actResp := map[string]interface{}{}
+			err := json.Unmarshal(data, &actResp)
+			require.NoError(t, err)
+			if tc.code != 200 {
+				require.Equal(t, "error", actResp["status"])
+				require.Equal(t, tc.errMsg, actResp["message"])
+			} else {
+				require.Equal(t, "success", actResp["status"])
+				require.Equal(t, tc.expListID, int64(actResp["list_id"].(float64)))
+			}
+		})
 	}
 }
 
@@ -169,36 +171,38 @@ func TestGetListByID(t *testing.T) {
 	}
 
 	for _, tc := range tests {
-		ls := new(mocks.ListService)
-		ls.On("GetListByID", mock.Anything, mock.Anything).Return(tc.getRetList, tc.getRetErr)
-		tsObj := new(mocks.TokenService)
-		tsObj.On("Verify", mock.Anything).Return(
-			tc.verifyRetUserID, tc.verifyRetUserUUID,
-			tc.verifyRerErr,
-		)
-		handler := New(nil, nil, tsObj, ls, getTestLogger())
-		r := handler.InitRoutes(gin.TestMode)
-		code, data := helpers.MakeRequest(
-			r,
-			t,
-			http.MethodGet,
-			fmt.Sprintf("/api/lists/%s", tc.paramListID),
-			bytes.NewBuffer([]byte{}),
-			tc.headers,
-		)
-		require.Equal(t, tc.code, code)
-		if tc.code != 200 {
-			errResp := &ErrorResponse{}
-			err := json.Unmarshal(data, errResp)
-			require.NoError(t, err)
-			require.Equal(t, "error", errResp.Status)
-			require.Equal(t, tc.errMsg, errResp.Message)
-		} else {
-			userList := &models.List{}
-			err := json.Unmarshal(data, userList)
-			require.NoError(t, err)
-			require.Equal(t, tc.expList, userList)
-		}
+		t.Run(tc.name, func(t *testing.T) {
+			ls := new(mocks.ListService)
+			ls.On("GetListByID", mock.Anything, mock.Anything).Return(tc.getRetList, tc.getRetErr)
+			tsObj := new(mocks.TokenService)
+			tsObj.On("Verify", mock.Anything).Return(
+				tc.verifyRetUserID, tc.verifyRetUserUUID,
+				tc.verifyRerErr,
+			)
+			handler := New(nil, nil, tsObj, ls, getTestLogger())
+			r := handler.InitRoutes(gin.TestMode)
+			code, data := helpers.MakeRequest(
+				r,
+				t,
+				http.MethodGet,
+				fmt.Sprintf("/api/lists/%s", tc.paramListID),
+				bytes.NewBuffer([]byte{}),
+				tc.headers,
+			)
+			require.Equal(t, tc.code, code)
+			if tc.code != 200 {
+				errResp := &ErrorResponse{}
+				err := json.Unmarshal(data, errResp)
+				require.NoError(t, err)
+				require.Equal(t, "error", errResp.Status)
+				require.Equal(t, tc.errMsg, errResp.Message)
+			} else {
+				userList := &models.List{}
+				err := json.Unmarshal(data, userList)
+				require.NoError(t, err)
+				require.Equal(t, tc.expList, userList)
+			}
+		})
 	}
 }
 
