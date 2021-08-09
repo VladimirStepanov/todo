@@ -70,7 +70,7 @@ func (h *Handler) getListByID(c *gin.Context) {
 
 type editRoleReq struct {
 	UserID  int64 `json:"user_id" binding:"required"`
-	IsAdmin bool  `json:"is_admin" binding:"required"`
+	IsAdmin *bool `json:"is_admin" binding:"required"`
 }
 
 func (h *Handler) editRole(c *gin.Context) {
@@ -80,7 +80,7 @@ func (h *Handler) editRole(c *gin.Context) {
 	}
 
 	listID, _ := strconv.ParseInt(c.Param("list_id"), 10, 64)
-	err := h.ListService.EditRole(listID, req.UserID, req.IsAdmin)
+	err := h.ListService.EditRole(listID, req.UserID, *(req.IsAdmin))
 
 	if err != nil {
 		switch err {

@@ -35,7 +35,7 @@ func bindData(c *gin.Context, req interface{}) bool {
 			for _, err := range errs {
 				invalidArgs = append(invalidArgs, invalidArgument{
 					err.Field(),
-					err.Value().(string),
+					fmt.Sprintf("%v", err.Value()),
 					err.Tag(),
 					err.Param(),
 				})
