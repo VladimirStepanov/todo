@@ -78,7 +78,52 @@ func (ls *PostgresListRepository) IsListAdmin(ListID, userID int64) error {
 	return nil
 }
 
-func (ls *PostgresListRepository) GrantRole(listID, fromUser, toUserID int64, role bool) error {
+func (ls *PostgresListRepository) GrantRole(listID, userID int64, role bool) error {
+	tx, err := ls.DB.Beginx()
+	if err != nil {
+		return err
+	}
+
+	rows, err := tx.Exec(
+		`UPDATE users_lists
+		 SET is_admin=$1
+		 WHERE user_id=$2 AND list_id=$3`,
+		role, userID, listID,
+	)
+
+	if err != nil {
+		if e := tx.Rollback(); e != nil {
+			return e
+		}
+		return err
+	}
+
+	ra, err := rows.RowsAffected()
+	if err != nil {
+		if e := tx.Rollback(); e != nil {
+			return e
+		}
+		return err
+	}
+
+	if ra == 0 {
+		_, err = tx.Exec(
+			`INSERT INTO users_lists (user_id, list_id, is_admin)
+			 VALUES($1, $2, $3)`, userID, listID, role,
+		)
+
+		if err != nil {
+			if e := tx.Rollback(); e != nil {
+				return e
+			}
+			return err
+		}
+	}
+
+	err = tx.Commit()
+	if err != nil {
+		return err
+	}
 	return nil
 }
 

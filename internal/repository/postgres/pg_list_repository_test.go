@@ -274,3 +274,90 @@ func TestIsListAdmin(t *testing.T) {
 		})
 	}
 }
+
+func TestGrantRole(t *testing.T) {
+	mockDB, mock, err := sqlmock.New()
+
+	if err != nil {
+		t.Fatal("Error while sqlmock.New()", err)
+	}
+
+	defer mockDB.Close()
+
+	db := sqlx.NewDb(mockDB, "sqlmock")
+
+	lr := NewPostgresListRepository(db)
+
+	tests := []struct {
+		name    string
+		setMock func(m sqlmock.Sqlmock, e error)
+		retErr  error
+		expErr  error
+	}{
+		{
+			name: "Update unknown error",
+			setMock: func(m sqlmock.Sqlmock, e error) {
+				m.ExpectBegin()
+				m.ExpectExec("UPDATE users_lists").
+					WithArgs(true, 1, testList.ID).
+					WillReturnError(e)
+				m.ExpectRollback()
+			},
+			retErr: ErrUnknown,
+			expErr: ErrUnknown,
+		},
+		{
+			name: "Success update",
+			setMock: func(m sqlmock.Sqlmock, e error) {
+				m.ExpectBegin()
+				m.ExpectExec("UPDATE users_lists").
+					WithArgs(true, 1, testList.ID).
+					WillReturnResult(sqlmock.NewResult(0, 1))
+				m.ExpectCommit()
+			},
+			retErr: nil,
+			expErr: nil,
+		},
+		{
+			name: "Insert unknown error",
+			setMock: func(m sqlmock.Sqlmock, e error) {
+				m.ExpectBegin()
+				m.ExpectExec("UPDATE users_lists").
+					WithArgs(true, 1, testList.ID).
+					WillReturnResult(sqlmock.NewResult(0, 0))
+
+				m.ExpectExec("INSERT INTO users_lists").
+					WithArgs(1, testList.ID, true).
+					WillReturnError(e)
+				m.ExpectRollback()
+			},
+			retErr: ErrUnknown,
+			expErr: ErrUnknown,
+		},
+		{
+			name: "Success grant role",
+			setMock: func(m sqlmock.Sqlmock, e error) {
+				m.ExpectBegin()
+				m.ExpectExec("UPDATE users_lists").
+					WithArgs(true, 1, testList.ID).
+					WillReturnResult(sqlmock.NewResult(0, 0))
+
+				m.ExpectExec("INSERT INTO users_lists").
+					WithArgs(1, testList.ID, true).
+					WillReturnResult(sqlmock.NewResult(5, 1))
+				m.ExpectCommit()
+			},
+			retErr: nil,
+			expErr: nil,
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			tc.setMock(mock, tc.retErr)
+
+			err := lr.GrantRole(testList.ID, 1, true)
+			require.Equal(t, tc.expErr, err)
+		})
+	}
+}
