@@ -16,4 +16,5 @@ var (
 	ErrNoList               = errors.New("list not found")
 	ErrBadParam             = errors.New("bad url parameter")
 	ErrNoListAccess         = errors.New("no access to this list")
+	ErrUserNotFound         = errors.New("user not found")
 )
