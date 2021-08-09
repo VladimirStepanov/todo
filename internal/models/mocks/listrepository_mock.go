@@ -93,13 +93,13 @@ func (_m *ListRepository) GetUserLists(userID int64) ([]*models.List, error) {
 	return r0, r1
 }
 
-// GrantRole provides a mock function with given fields: listID, fromUser, toUserID, role
-func (_m *ListRepository) GrantRole(listID int64, fromUser int64, toUserID int64, role bool) error {
-	ret := _m.Called(listID, fromUser, toUserID, role)
+// GrantRole provides a mock function with given fields: listID, userID, role
+func (_m *ListRepository) GrantRole(listID int64, userID int64, role bool) error {
+	ret := _m.Called(listID, userID, role)
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(int64, int64, int64, bool) error); ok {
-		r0 = rf(listID, fromUser, toUserID, role)
+	if rf, ok := ret.Get(0).(func(int64, int64, bool) error); ok {
+		r0 = rf(listID, userID, role)
 	} else {
 		r0 = ret.Error(0)
 	}

@@ -20,7 +20,7 @@ func (ls *ListService) IsListAdmin(ListID, userID int64) error {
 	return ls.repo.IsListAdmin(ListID, userID)
 }
 
-func (ls *ListService) GrantRole(listID, fromUser, toUserID int64, role bool) error {
+func (ls *ListService) GrantRole(listID, userID int64, role bool) error {
 	return nil
 }
 
