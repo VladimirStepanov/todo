@@ -80,7 +80,7 @@ func (h *Handler) onlyAdminAccess(c *gin.Context) {
 		return
 	}
 
-	err = h.ListService.IsListAdmin(userID, listID)
+	err = h.ListService.IsListAdmin(listID, userID)
 
 	if err != nil {
 		switch err {
