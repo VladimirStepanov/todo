@@ -82,6 +82,20 @@ var createListUser = &models.User{
 	ActivatedLink: "createListUser",
 }
 
+var editRoleUser1 = &models.User{
+	Email:         "editRoleUser1@mail.ru",
+	Password:      defaultSalt,
+	IsActivated:   true,
+	ActivatedLink: "editRoleUser1",
+}
+
+var editRoleUser2 = &models.User{
+	Email:         "editRoleUser2@mail.ru",
+	Password:      defaultSalt,
+	IsActivated:   true,
+	ActivatedLink: "editRoleUser2",
+}
+
 var dataForInsert = []*models.User{
 	userForCreate,
 	notConfirmedUser,
@@ -90,6 +104,8 @@ var dataForInsert = []*models.User{
 	maxLoggedInUser,
 	authNotConfirmedUser,
 	createListUser,
+	editRoleUser1,
+	editRoleUser2,
 }
 
 var (
@@ -98,6 +114,16 @@ var (
 	maxLoggenInCount = 10
 	testUUID         = "60a1cc8e-f741-45bc-a794-1ac655790c3b"
 )
+
+func GetUserID(email string) int64 {
+	for i, u := range dataForInsert {
+		if u.Email == email {
+			return int64(i + 1)
+		}
+	}
+
+	return 0
+}
 
 func initDb(t *testing.T, db *sqlx.DB) {
 

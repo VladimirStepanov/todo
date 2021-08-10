@@ -110,3 +110,99 @@ func (suite *TestingSuite) TestGetListByID() {
 
 	makeLogout(suite.T(), suite.router, authResp)
 }
+
+func (suite *TestingSuite) TestEditRole() {
+	listInput := fmt.Sprintf(
+		`{"title": "%s", "description": "%s"}`,
+		listForCreate.Title, listForCreate.Description,
+	)
+
+	siginInputUser1 := fmt.Sprintf(
+		`{"email": "%s", "password": "%s"}`,
+		editRoleUser1.Email, defaultPassword,
+	)
+	siginInputUser2 := fmt.Sprintf(
+		`{"email": "%s", "password": "%s"}`,
+		editRoleUser2.Email, defaultPassword,
+	)
+
+	authRespUser1 := makeSignIn(suite.T(), suite.router, siginInputUser1)
+	authRespUser2 := makeSignIn(suite.T(), suite.router, siginInputUser2)
+
+	headersUser1 := map[string]string{
+		"Authorization": fmt.Sprintf("Bearer %s", authRespUser1.AccessToken),
+	}
+	headersUser2 := map[string]string{
+		"Authorization": fmt.Sprintf("Bearer %s", authRespUser2.AccessToken),
+	}
+
+	ListID := createList(suite.T(), suite.router, listInput, headersUser1)
+
+	code, _ := helpers.MakeRequest(
+		suite.router,
+		suite.T(),
+		http.MethodGet,
+		fmt.Sprintf("/api/lists/%d", ListID),
+		bytes.NewBuffer([]byte{}),
+		headersUser2,
+	)
+
+	require.Equal(suite.T(), http.StatusNotFound, code)
+
+	tests := []struct {
+		name      string
+		code      int
+		input     string
+		expErrMsg string
+	}{
+		{
+			name:      "User not found",
+			code:      http.StatusNotFound,
+			input:     `{"user_id": 77777, "is_admin":true}`,
+			expErrMsg: models.ErrUserNotFound.Error(),
+		},
+		{
+			name:      "EditRole success",
+			code:      http.StatusOK,
+			input:     fmt.Sprintf(`{"user_id": %d, "is_admin":true}`, GetUserID(editRoleUser2.Email)),
+			expErrMsg: "",
+		},
+	}
+
+	for _, tc := range tests {
+		suite.T().Run(tc.name, func(t *testing.T) {
+			code, editRoleData := helpers.MakeRequest(
+				suite.router,
+				t,
+				http.MethodPost,
+				fmt.Sprintf("/api/lists/%d/edit-role", ListID),
+				bytes.NewBuffer([]byte(tc.input)),
+				headersUser1,
+			)
+			require.Equal(t, tc.code, code)
+
+			if tc.expErrMsg != "" {
+				errResp := &handler.ErrorResponse{}
+				err := json.Unmarshal(editRoleData, errResp)
+				require.NoError(t, err)
+				require.Equal(t, tc.expErrMsg, errResp.Message)
+			} else {
+				actResp := map[string]interface{}{}
+				err := json.Unmarshal(editRoleData, &actResp)
+				require.NoError(t, err)
+				require.Equal(t, "success", actResp["status"])
+			}
+		})
+	}
+
+	code, _ = helpers.MakeRequest(
+		suite.router,
+		suite.T(),
+		http.MethodGet,
+		fmt.Sprintf("/api/lists/%d", ListID),
+		bytes.NewBuffer([]byte{}),
+		headersUser2,
+	)
+
+	require.Equal(suite.T(), http.StatusOK, code)
+}
