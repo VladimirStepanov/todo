@@ -115,6 +115,7 @@ var (
 	testUUID         = "60a1cc8e-f741-45bc-a794-1ac655790c3b"
 )
 
+//get user id by email
 func GetUserID(email string) int64 {
 	for i, u := range dataForInsert {
 		if u.Email == email {
