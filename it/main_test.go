@@ -22,6 +22,7 @@ import (
 	"github.com/stretchr/testify/suite"
 )
 
+//comment
 type TestingSuite struct {
 	suite.Suite
 	router http.Handler
