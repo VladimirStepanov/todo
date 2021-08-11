@@ -172,3 +172,39 @@ func TestEditRole(t *testing.T) {
 		})
 	}
 }
+
+func TestDeleteList(t *testing.T) {
+	tests := []struct {
+		name   string
+		retErr error
+		expErr error
+	}{
+		{
+			name:   "Return unknown error",
+			retErr: ErrSome,
+			expErr: ErrSome,
+		},
+		{
+			name:   "Return ErrNoList error",
+			retErr: models.ErrNoList,
+			expErr: models.ErrNoList,
+		},
+		{
+			name:   "Success grant role",
+			retErr: nil,
+			expErr: nil,
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			lr := new(mocks.ListRepository)
+			lr.On("Delete", mock.Anything).Return(tc.retErr)
+
+			ls := NewListService(lr)
+
+			err := ls.Delete(1)
+			require.Equal(t, tc.expErr, err)
+		})
+	}
+}

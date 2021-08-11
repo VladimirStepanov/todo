@@ -33,7 +33,7 @@ func (ls *ListService) GetUserLists(userID int64) ([]*models.List, error) {
 }
 
 func (ls *ListService) Delete(listID int64) error {
-	return nil
+	return ls.repo.Delete(listID)
 }
 
 func (ls *ListService) Update(list *models.List) error {
