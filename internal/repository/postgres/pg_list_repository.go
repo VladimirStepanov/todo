@@ -156,10 +156,10 @@ func (ls *PostgresListRepository) GetUserLists(userID int64) ([]*models.List, er
 	return nil, nil
 }
 
-func (ls *PostgresListRepository) Delete(listID, userID int64) error {
+func (ls *PostgresListRepository) Delete(listID int64) error {
 	return nil
 }
 
-func (ls *PostgresListRepository) Update(userID int64, list *models.List) error {
+func (ls *PostgresListRepository) Update(list *models.List) error {
 	return nil
 }

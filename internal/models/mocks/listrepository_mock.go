@@ -33,13 +33,13 @@ func (_m *ListRepository) Create(title string, description string, userID int64)
 	return r0, r1
 }
 
-// Delete provides a mock function with given fields: listID, userID
-func (_m *ListRepository) Delete(listID int64, userID int64) error {
-	ret := _m.Called(listID, userID)
+// Delete provides a mock function with given fields: listID
+func (_m *ListRepository) Delete(listID int64) error {
+	ret := _m.Called(listID)
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(int64, int64) error); ok {
-		r0 = rf(listID, userID)
+	if rf, ok := ret.Get(0).(func(int64) error); ok {
+		r0 = rf(listID)
 	} else {
 		r0 = ret.Error(0)
 	}
@@ -121,13 +121,13 @@ func (_m *ListRepository) IsListAdmin(ListID int64, userID int64) error {
 	return r0
 }
 
-// Update provides a mock function with given fields: userID, list
-func (_m *ListRepository) Update(userID int64, list *models.List) error {
-	ret := _m.Called(userID, list)
+// Update provides a mock function with given fields: list
+func (_m *ListRepository) Update(list *models.List) error {
+	ret := _m.Called(list)
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(int64, *models.List) error); ok {
-		r0 = rf(userID, list)
+	if rf, ok := ret.Get(0).(func(*models.List) error); ok {
+		r0 = rf(list)
 	} else {
 		r0 = ret.Error(0)
 	}

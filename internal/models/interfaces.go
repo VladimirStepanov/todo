@@ -37,8 +37,8 @@ type ListService interface {
 	EditRole(listID, userID int64, role bool) error
 	GetListByID(listID, userID int64) (*List, error)
 	GetUserLists(userID int64) ([]*List, error)
-	Delete(listID, userID int64) error
-	Update(userID int64, list *List) error
+	Delete(listID int64) error
+	Update(list *List) error
 	IsListAdmin(ListID, userID int64) error
 }
 
@@ -47,7 +47,7 @@ type ListRepository interface {
 	EditRole(listID, userID int64, role bool) error
 	GetListByID(listID, userID int64) (*List, error)
 	GetUserLists(userID int64) ([]*List, error)
-	Delete(listID, userID int64) error
-	Update(userID int64, list *List) error
+	Delete(listID int64) error
+	Update(list *List) error
 	IsListAdmin(ListID, userID int64) error
 }

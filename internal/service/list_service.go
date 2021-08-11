@@ -32,10 +32,10 @@ func (ls *ListService) GetUserLists(userID int64) ([]*models.List, error) {
 	return nil, nil
 }
 
-func (ls *ListService) Delete(listID, userID int64) error {
+func (ls *ListService) Delete(listID int64) error {
 	return nil
 }
 
-func (ls *ListService) Update(userID int64, list *models.List) error {
+func (ls *ListService) Update(list *models.List) error {
 	return nil
 }
