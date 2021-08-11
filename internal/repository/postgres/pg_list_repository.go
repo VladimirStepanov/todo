@@ -157,6 +157,22 @@ func (ls *PostgresListRepository) GetUserLists(userID int64) ([]*models.List, er
 }
 
 func (ls *PostgresListRepository) Delete(listID int64) error {
+	res, err := ls.DB.Exec("DELETE FROM lists WHERE id=$1", listID)
+
+	if err != nil {
+		return err
+	}
+
+	ra, err := res.RowsAffected()
+
+	if err != nil {
+		return err
+	}
+
+	if ra == 0 {
+		return models.ErrNoList
+	}
+
 	return nil
 }
 
