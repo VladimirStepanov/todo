@@ -80,11 +80,33 @@ func (h *Handler) editRole(c *gin.Context) {
 	}
 
 	listID, _ := strconv.ParseInt(c.Param("list_id"), 10, 64)
+
 	err := h.ListService.EditRole(listID, req.UserID, *(req.IsAdmin))
 
 	if err != nil {
 		switch err {
 		case models.ErrUserNotFound:
+			c.JSON(http.StatusNotFound, gin.H{
+				"status":  "error",
+				"message": err.Error(),
+			})
+		default:
+			h.InternalError(c, err)
+		}
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"status": "success"})
+}
+
+func (h *Handler) deleteList(c *gin.Context) {
+	listID, _ := strconv.ParseInt(c.Param("list_id"), 10, 64)
+
+	err := h.ListService.Delete(listID)
+
+	if err != nil {
+		switch err {
+		case models.ErrNoList:
 			c.JSON(http.StatusNotFound, gin.H{
 				"status":  "error",
 				"message": err.Error(),
