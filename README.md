@@ -235,3 +235,61 @@ curl -H "Authorization: Bearer ${ACCESS_TOKEN}" localhost:8080/api/lists/1
     "description": "description"
 }
 ```
+
+## Edit role
+
+`POST /api/lists/:list_id/edit-role`
+
+Params (HTTP header):
+* Authorization: Bearer <access_token>
+
+Params (json):
+* user_id [int]
+* is_admin [bool]
+
+Params (url):
+
+* list id [int]
+
+
+
+#### Request
+```bash
+curl -L -X POST 'localhost:8080/api/lists/:list_id/edit-role' -H 'Content-Type: application/json' -H "Authorization: Bearer ${ACCESS_TOKEN}" --data-raw '{
+    "user_id": 10,
+    "is_admin": true
+}'
+```
+
+#### Response
+
+```json
+{
+    "status": "success"
+}
+```
+
+## Delete
+
+`POST /api/lists/:list_id/delete`
+
+Params (HTTP header):
+* Authorization: Bearer <access_token>
+
+Params (url):
+
+* list id [int]
+
+
+
+#### Request
+```bash
+curl -L -X POST 'localhost:8080/api/lists/:list_id/delete' -H 'Content-Type: application/json' -H "Authorization: Bearer ${ACCESS_TOKEN}"
+
+#### Response
+
+```json
+{
+    "status": "success"
+}
+```
