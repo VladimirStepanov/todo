@@ -206,3 +206,80 @@ func (suite *TestingSuite) TestEditRole() {
 
 	require.Equal(suite.T(), http.StatusOK, code)
 }
+
+func (suite *TestingSuite) TestDeleteList() {
+	listInput := fmt.Sprintf(
+		`{"title": "%s", "description": "%s"}`,
+		listForCreate.Title, listForCreate.Description,
+	)
+	siginInputUser := fmt.Sprintf(
+		`{"email": "%s", "password": "%s"}`,
+		deleteUser.Email, defaultPassword,
+	)
+
+	authRespUser := makeSignIn(suite.T(), suite.router, siginInputUser)
+
+	headersUser := map[string]string{
+		"Authorization": fmt.Sprintf("Bearer %s", authRespUser.AccessToken),
+	}
+
+	ListID := createList(suite.T(), suite.router, listInput, headersUser)
+
+	tests := []struct {
+		name        string
+		code        int
+		paramListId int
+		expErrMsg   string
+	}{
+		{
+			name:        "List not found",
+			code:        http.StatusNotFound,
+			paramListId: 10000,
+			expErrMsg:   models.ErrNoList.Error(),
+		},
+		{
+			name:        "Success delete",
+			code:        http.StatusOK,
+			paramListId: int(ListID),
+			expErrMsg:   "",
+		},
+	}
+
+	for _, tc := range tests {
+		suite.T().Run(tc.name, func(t *testing.T) {
+			code, editRoleData := helpers.MakeRequest(
+				suite.router,
+				t,
+				http.MethodPost,
+				fmt.Sprintf("/api/lists/%d/delete", tc.paramListId),
+				bytes.NewBuffer([]byte{}),
+				headersUser,
+			)
+			require.Equal(t, tc.code, code)
+
+			if tc.expErrMsg != "" {
+				errResp := &handler.ErrorResponse{}
+				err := json.Unmarshal(editRoleData, errResp)
+				require.NoError(t, err)
+				require.Equal(t, tc.expErrMsg, errResp.Message)
+			} else {
+				actResp := map[string]interface{}{}
+				err := json.Unmarshal(editRoleData, &actResp)
+				require.NoError(t, err)
+				require.Equal(t, "success", actResp["status"])
+			}
+		})
+	}
+
+	suite.T().Run("Check delete result", func(t *testing.T) {
+		code, _ := helpers.MakeRequest(
+			suite.router,
+			t,
+			http.MethodGet,
+			fmt.Sprintf("/api/lists/%d", ListID),
+			bytes.NewBuffer([]byte{}),
+			headersUser,
+		)
+		require.Equal(suite.T(), http.StatusNotFound, code)
+	})
+}
