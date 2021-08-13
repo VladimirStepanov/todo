@@ -6,6 +6,11 @@ type List struct {
 	Description string `json:"description" db:"description"`
 }
 
+type UpdateListReq struct {
+	Title       *string `json:"title"`
+	Description *string `json:"description"`
+}
+
 type UsersList struct {
 	UserID  int64 `db:"user_id"`
 	ListID  int64 `db:"list_id"`
