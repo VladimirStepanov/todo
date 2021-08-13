@@ -238,7 +238,7 @@ curl -H "Authorization: Bearer ${ACCESS_TOKEN}" localhost:8080/api/lists/1
 
 ## Edit role
 
-`POST /api/lists/:list_id/edit-role`
+`PATCH /api/lists/:list_id/edit-role`
 
 Params (HTTP header):
 * Authorization: Bearer <access_token>
@@ -255,7 +255,7 @@ Params (url):
 
 #### Request
 ```bash
-curl -L -X POST 'localhost:8080/api/lists/:list_id/edit-role' -H 'Content-Type: application/json' -H "Authorization: Bearer ${ACCESS_TOKEN}" --data-raw '{
+curl -L -X PATCH 'localhost:8080/api/lists/:list_id/edit-role' -H 'Content-Type: application/json' -H "Authorization: Bearer ${ACCESS_TOKEN}" --data-raw '{
     "user_id": 10,
     "is_admin": true
 }'

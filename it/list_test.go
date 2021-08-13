@@ -174,7 +174,7 @@ func (suite *TestingSuite) TestEditRole() {
 			code, editRoleData := helpers.MakeRequest(
 				suite.router,
 				t,
-				http.MethodPost,
+				http.MethodPatch,
 				fmt.Sprintf("/api/lists/%d/edit-role", ListID),
 				bytes.NewBuffer([]byte(tc.input)),
 				headersUser1,

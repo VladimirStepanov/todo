@@ -292,7 +292,7 @@ func TestEditRole(t *testing.T) {
 			code, data := helpers.MakeRequest(
 				r,
 				t,
-				http.MethodPost,
+				http.MethodPatch,
 				fmt.Sprintf("/api/lists/%s/edit-role", tc.paramListID),
 				bytes.NewBuffer([]byte(input)),
 				headers,

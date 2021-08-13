@@ -35,7 +35,7 @@ func (h *Handler) InitRoutes(mode string) http.Handler {
 		{
 			lists.POST("", h.listCreate)
 			lists.GET("/:list_id", h.getListByID)
-			lists.POST("/:list_id/edit-role", h.onlyAdminAccess, h.editRole)
+			lists.PATCH("/:list_id/edit-role", h.onlyAdminAccess, h.editRole)
 			lists.DELETE("/:list_id", h.onlyAdminAccess, h.deleteList)
 		}
 	}
