@@ -176,6 +176,6 @@ func (ls *PostgresListRepository) Delete(listID int64) error {
 	return nil
 }
 
-func (ls *PostgresListRepository) Update(list *models.List) error {
+func (ls *PostgresListRepository) Update(list *models.UpdateListReq) error {
 	return nil
 }
