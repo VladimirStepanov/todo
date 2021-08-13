@@ -439,3 +439,70 @@ func TestDeleteList(t *testing.T) {
 		})
 	}
 }
+
+func TestUpdateList(t *testing.T) {
+	mockDB, mock, err := sqlmock.New()
+
+	if err != nil {
+		t.Fatal("Error while sqlmock.New()", err)
+	}
+
+	defer mockDB.Close()
+
+	db := sqlx.NewDb(mockDB, "sqlmock")
+
+	lr := NewPostgresListRepository(db)
+
+	req := &models.UpdateListReq{
+		Title:       new(string),
+		Description: new(string),
+	}
+	*req.Title = "hello"
+	*req.Description = "world"
+
+	tests := []struct {
+		name    string
+		setMock func(m sqlmock.Sqlmock, e error)
+		retErr  error
+		expErr  error
+	}{
+		{
+			name: "Update unknown error",
+			setMock: func(m sqlmock.Sqlmock, e error) {
+				m.ExpectExec("UPDATE lists").
+					WithArgs(*req.Title, *req.Description, 1).
+					WillReturnError(e)
+			},
+			retErr: ErrUnknown,
+			expErr: ErrUnknown,
+		},
+		{
+			name: "Update return ErrNoList",
+			setMock: func(m sqlmock.Sqlmock, e error) {
+				m.ExpectExec("UPDATE lists").
+					WithArgs(*req.Title, *req.Description, 1).
+					WillReturnResult(sqlmock.NewResult(0, 0))
+			},
+			retErr: nil,
+			expErr: models.ErrNoList,
+		},
+		{
+			name: "Success update",
+			setMock: func(m sqlmock.Sqlmock, e error) {
+				m.ExpectExec("UPDATE lists").
+					WithArgs(*req.Title, *req.Description, 1).
+					WillReturnResult(sqlmock.NewResult(1, 1))
+			},
+			retErr: nil,
+			expErr: nil,
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			tc.setMock(mock, tc.retErr)
+			err := lr.Update(1, req)
+			require.Equal(t, tc.expErr, err)
+		})
+	}
+}

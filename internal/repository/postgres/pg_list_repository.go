@@ -2,6 +2,8 @@ package postgres
 
 import (
 	"database/sql"
+	"fmt"
+	"strings"
 
 	"github.com/VladimirStepanov/todo-app/internal/models"
 	"github.com/jmoiron/sqlx"
@@ -176,6 +178,55 @@ func (ls *PostgresListRepository) Delete(listID int64) error {
 	return nil
 }
 
-func (ls *PostgresListRepository) Update(list *models.UpdateListReq) error {
+type Updater struct {
+	args    []interface{}
+	queries []string
+	index   int
+}
+
+func (u *Updater) addUpdateItem(field string, arg interface{}) {
+	u.queries = append(u.queries, fmt.Sprintf("%s=$%d", field, u.index))
+	u.args = append(u.args, arg)
+	u.index++
+}
+
+func (ls *PostgresListRepository) Update(listID int64, list *models.UpdateListReq) error {
+	updObj := Updater{
+		args:    []interface{}{},
+		queries: []string{},
+		index:   1,
+	}
+
+	if list.Title != nil {
+		updObj.addUpdateItem("title", *list.Title)
+	}
+
+	if list.Description != nil {
+		updObj.addUpdateItem("description", *list.Description)
+	}
+
+	query := fmt.Sprintf(
+		"UPDATE lists SET %s WHERE id=$%d",
+		strings.Join(updObj.queries, ","),
+		updObj.index,
+	)
+
+	updObj.args = append(updObj.args, listID)
+	res, err := ls.DB.Exec(query, updObj.args...)
+
+	if err != nil {
+		return err
+	}
+
+	ra, err := res.RowsAffected()
+
+	if err != nil {
+		return err
+	}
+
+	if ra == 0 {
+		return models.ErrNoList
+	}
+
 	return nil
 }
