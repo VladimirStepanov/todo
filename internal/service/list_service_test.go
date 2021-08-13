@@ -208,3 +208,80 @@ func TestDeleteList(t *testing.T) {
 		})
 	}
 }
+
+func TestUpdate(t *testing.T) {
+	goodReq := &models.UpdateListReq{
+		Title:       new(string),
+		Description: new(string),
+	}
+
+	*goodReq.Title = "helllo"
+	*goodReq.Description = "world"
+
+	tests := []struct {
+		name   string
+		req    func() *models.UpdateListReq
+		retErr error
+		expErr error
+	}{
+		{
+			name: "Empty arguments",
+			req: func() *models.UpdateListReq {
+				return &models.UpdateListReq{
+					Title:       nil,
+					Description: nil,
+				}
+			},
+			retErr: nil,
+			expErr: models.ErrUpdateEmptyArgs,
+		},
+		{
+			name: "Title too short error",
+			req: func() *models.UpdateListReq {
+				title := "123"
+				return &models.UpdateListReq{
+					Title:       &title,
+					Description: nil,
+				}
+			},
+			retErr: nil,
+			expErr: models.ErrTitleTooShort,
+		},
+		{
+			name: "Return unknown error",
+			req: func() *models.UpdateListReq {
+				return goodReq
+			},
+			retErr: ErrSome,
+			expErr: ErrSome,
+		},
+		{
+			name: "Return ErrNoList error",
+			req: func() *models.UpdateListReq {
+				return goodReq
+			},
+			retErr: models.ErrNoList,
+			expErr: models.ErrNoList,
+		},
+		{
+			name: "Success grant role",
+			req: func() *models.UpdateListReq {
+				return goodReq
+			},
+			retErr: nil,
+			expErr: nil,
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			lr := new(mocks.ListRepository)
+			lr.On("Update", mock.Anything, mock.Anything).Return(tc.retErr)
+
+			ls := NewListService(lr)
+
+			err := ls.Update(1, tc.req())
+			require.Equal(t, tc.expErr, err)
+		})
+	}
+}

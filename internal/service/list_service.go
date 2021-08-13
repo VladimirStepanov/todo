@@ -37,5 +37,10 @@ func (ls *ListService) Delete(listID int64) error {
 }
 
 func (ls *ListService) Update(listID int64, list *models.UpdateListReq) error {
-	return nil
+	if list.Title == nil && list.Description == nil {
+		return models.ErrUpdateEmptyArgs
+	} else if len(*list.Title) < 5 {
+		return models.ErrTitleTooShort
+	}
+	return ls.repo.Update(listID, list)
 }
