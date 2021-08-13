@@ -250,8 +250,8 @@ func (suite *TestingSuite) TestDeleteList() {
 			code, editRoleData := helpers.MakeRequest(
 				suite.router,
 				t,
-				http.MethodPost,
-				fmt.Sprintf("/api/lists/%d/delete", tc.paramListId),
+				http.MethodDelete,
+				fmt.Sprintf("/api/lists/%d", tc.paramListId),
 				bytes.NewBuffer([]byte{}),
 				headersUser,
 			)

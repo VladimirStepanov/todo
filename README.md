@@ -271,7 +271,7 @@ curl -L -X POST 'localhost:8080/api/lists/:list_id/edit-role' -H 'Content-Type: 
 
 ## Delete
 
-`POST /api/lists/:list_id/delete`
+`DELETE /api/lists/:list_id`
 
 Params (HTTP header):
 * Authorization: Bearer <access_token>
@@ -284,7 +284,7 @@ Params (url):
 
 #### Request
 ```bash
-curl -L -X POST 'localhost:8080/api/lists/:list_id/delete' -H 'Content-Type: application/json' -H "Authorization: Bearer ${ACCESS_TOKEN}"
+curl -L -X DELETE 'localhost:8080/api/lists/:list_id' -H 'Content-Type: application/json' -H "Authorization: Bearer ${ACCESS_TOKEN}"
 
 #### Response
 

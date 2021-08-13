@@ -371,8 +371,8 @@ func TestDeleteList(t *testing.T) {
 			code, data := helpers.MakeRequest(
 				r,
 				t,
-				http.MethodPost,
-				fmt.Sprintf("/api/lists/%s/delete", tc.paramListID),
+				http.MethodDelete,
+				fmt.Sprintf("/api/lists/%s", tc.paramListID),
 				bytes.NewBuffer([]byte{}),
 				headers,
 			)
