@@ -36,6 +36,6 @@ func (ls *ListService) Delete(listID int64) error {
 	return ls.repo.Delete(listID)
 }
 
-func (ls *ListService) Update(list *models.UpdateListReq) error {
+func (ls *ListService) Update(listID int64, list *models.UpdateListReq) error {
 	return nil
 }

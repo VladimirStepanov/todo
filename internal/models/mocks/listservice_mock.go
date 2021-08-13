@@ -121,13 +121,13 @@ func (_m *ListService) IsListAdmin(ListID int64, userID int64) error {
 	return r0
 }
 
-// Update provides a mock function with given fields: list
-func (_m *ListService) Update(list *models.UpdateListReq) error {
-	ret := _m.Called(list)
+// Update provides a mock function with given fields: listID, list
+func (_m *ListService) Update(listID int64, list *models.UpdateListReq) error {
+	ret := _m.Called(listID, list)
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(*models.UpdateListReq) error); ok {
-		r0 = rf(list)
+	if rf, ok := ret.Get(0).(func(int64, *models.UpdateListReq) error); ok {
+		r0 = rf(listID, list)
 	} else {
 		r0 = ret.Error(0)
 	}
