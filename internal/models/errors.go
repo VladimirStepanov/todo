@@ -17,4 +17,6 @@ var (
 	ErrBadParam             = errors.New("bad url parameter")
 	ErrNoListAccess         = errors.New("no access to this list")
 	ErrUserNotFound         = errors.New("user not found")
+	ErrUpdateEmptyArgs      = errors.New("empty title and description")
+	ErrTitleTooShort        = errors.New("title too short. min length is 5")
 )
