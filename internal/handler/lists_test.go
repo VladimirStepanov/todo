@@ -389,3 +389,89 @@ func TestDeleteList(t *testing.T) {
 		})
 	}
 }
+
+func TestUpdateList(t *testing.T) {
+	headers := map[string]string{"Authorization": "Bearer token"}
+
+	tests := []struct {
+		name         string
+		code         int
+		input        string
+		updateRetErr error
+		errMsg       string
+	}{
+		{
+			name:         "Empty args",
+			code:         http.StatusBadRequest,
+			input:        `{}`,
+			updateRetErr: models.ErrUpdateEmptyArgs,
+			errMsg:       models.ErrUpdateEmptyArgs.Error(),
+		},
+		{
+			name:         "Title too short",
+			code:         http.StatusBadRequest,
+			input:        `{"title": "12"}`,
+			updateRetErr: models.ErrTitleTooShort,
+			errMsg:       models.ErrTitleTooShort.Error(),
+		},
+		{
+			name:         "Title too short",
+			code:         http.StatusNotFound,
+			input:        `{"title": "123456", "description": "hello world"}`,
+			updateRetErr: models.ErrNoList,
+			errMsg:       models.ErrNoList.Error(),
+		},
+		{
+			name:         "Unknown error",
+			code:         http.StatusInternalServerError,
+			input:        `{"title": "123456", "description": "hello world"}`,
+			updateRetErr: ErrUnknown,
+			errMsg:       "Internal server error",
+		},
+		{
+			name:         "Success update",
+			code:         http.StatusOK,
+			input:        `{"title": "123456", "description": "hello world"}`,
+			updateRetErr: nil,
+			errMsg:       "",
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			tsObj := new(mocks.TokenService)
+			tsObj.On("Verify", mock.Anything).Return(
+				int64(1), "aaa-aaa-aaa-aaa", nil,
+			)
+
+			ls := new(mocks.ListService)
+			ls.On("IsListAdmin", mock.Anything, mock.Anything).Return(
+				nil,
+			)
+			ls.On("Update", mock.Anything, mock.Anything).Return(
+				tc.updateRetErr,
+			)
+
+			handler := New(nil, nil, tsObj, ls, getTestLogger())
+			r := handler.InitRoutes(gin.TestMode)
+			code, data := helpers.MakeRequest(
+				r,
+				t,
+				http.MethodPatch,
+				fmt.Sprintf("/api/lists/%s", "1"),
+				bytes.NewBuffer([]byte(tc.input)),
+				headers,
+			)
+			require.Equal(t, tc.code, code)
+			actResp := map[string]interface{}{}
+			err := json.Unmarshal(data, &actResp)
+			require.NoError(t, err)
+			if tc.code != 200 {
+				require.Equal(t, "error", actResp["status"])
+				require.Equal(t, tc.errMsg, actResp["message"])
+			} else {
+				require.Equal(t, "success", actResp["status"])
+			}
+		})
+	}
+}

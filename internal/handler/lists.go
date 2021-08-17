@@ -119,3 +119,35 @@ func (h *Handler) deleteList(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"status": "success"})
 }
+
+func (h *Handler) updateList(c *gin.Context) {
+
+	var req models.UpdateListReq
+	if ok := bindData(c, &req); !ok {
+		return
+	}
+
+	listID, _ := strconv.ParseInt(c.Param("list_id"), 10, 64)
+
+	err := h.ListService.Update(listID, &req)
+
+	if err != nil {
+		switch err {
+		case models.ErrUpdateEmptyArgs, models.ErrTitleTooShort:
+			c.JSON(http.StatusBadRequest, gin.H{
+				"status":  "error",
+				"message": err.Error(),
+			})
+		case models.ErrNoList:
+			c.JSON(http.StatusNotFound, gin.H{
+				"status":  "error",
+				"message": err.Error(),
+			})
+		default:
+			h.InternalError(c, err)
+		}
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"status": "success"})
+}
