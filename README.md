@@ -293,3 +293,36 @@ curl -L -X DELETE 'localhost:8080/api/lists/:list_id' -H 'Content-Type: applicat
     "status": "success"
 }
 ```
+
+## Update list
+
+`PATCH /api/lists/:list_id`
+
+Params (HTTP header):
+* Authorization: Bearer <access_token>
+
+Params (json):
+* title [string]
+* description [string]
+
+Params (url):
+
+* list id [int]
+
+
+
+#### Request
+```bash
+curl -L -X PATCH 'localhost:8080/api/lists/:list_id' -H 'Content-Type: application/json' -H "Authorization: Bearer ${ACCESS_TOKEN}" --data-raw '{
+    "title": "new title",
+    "description": "new description"
+}'
+```
+
+#### Response
+
+```json
+{
+    "status": "success"
+}
+```
