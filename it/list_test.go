@@ -283,3 +283,111 @@ func (suite *TestingSuite) TestDeleteList() {
 		require.Equal(suite.T(), http.StatusNotFound, code)
 	})
 }
+
+func (suite *TestingSuite) TestUpdateList() {
+	updateList := &models.List{
+		ID:          0,
+		Title:       "New title",
+		Description: "New description",
+	}
+
+	listInput := fmt.Sprintf(
+		`{"title": "%s", "description": "%s"}`,
+		listForCreate.Title, listForCreate.Description,
+	)
+	siginInputUser := fmt.Sprintf(
+		`{"email": "%s", "password": "%s"}`,
+		updateUser.Email, defaultPassword,
+	)
+
+	authRespUser := makeSignIn(suite.T(), suite.router, siginInputUser)
+
+	headersUser := map[string]string{
+		"Authorization": fmt.Sprintf("Bearer %s", authRespUser.AccessToken),
+	}
+
+	ListID := createList(suite.T(), suite.router, listInput, headersUser)
+
+	tests := []struct {
+		name        string
+		code        int
+		input       string
+		paramListId int64
+		expErrMsg   string
+	}{
+		{
+			name:        "Empty arguments",
+			code:        http.StatusBadRequest,
+			input:       "{}",
+			paramListId: ListID,
+			expErrMsg:   models.ErrUpdateEmptyArgs.Error(),
+		},
+		{
+			name:        "Title too short",
+			code:        http.StatusBadRequest,
+			input:       `{"title": "1"}`,
+			paramListId: ListID,
+			expErrMsg:   models.ErrTitleTooShort.Error(),
+		},
+		{
+			name:        "Update list not found",
+			code:        http.StatusNotFound,
+			input:       `{"title": "1"}`,
+			paramListId: 77777,
+			expErrMsg:   models.ErrNoList.Error(),
+		},
+		{
+			name: "Success update",
+			code: http.StatusOK,
+			input: fmt.Sprintf(
+				`{"title": "%s", "description": "%s"}`,
+				updateList.Title, updateList.Description,
+			),
+			paramListId: ListID,
+			expErrMsg:   "",
+		},
+	}
+
+	for _, tc := range tests {
+		suite.T().Run(tc.name, func(t *testing.T) {
+			code, editRoleData := helpers.MakeRequest(
+				suite.router,
+				t,
+				http.MethodPatch,
+				fmt.Sprintf("/api/lists/%d", tc.paramListId),
+				bytes.NewBuffer([]byte(tc.input)),
+				headersUser,
+			)
+			require.Equal(t, tc.code, code)
+
+			if tc.expErrMsg != "" {
+				errResp := &handler.ErrorResponse{}
+				err := json.Unmarshal(editRoleData, errResp)
+				require.NoError(t, err)
+				require.Equal(t, tc.expErrMsg, errResp.Message)
+			} else {
+				actResp := map[string]interface{}{}
+				err := json.Unmarshal(editRoleData, &actResp)
+				require.NoError(t, err)
+				require.Equal(t, "success", actResp["status"])
+			}
+		})
+	}
+
+	suite.T().Run("Check update result", func(t *testing.T) {
+		code, getRequestData := helpers.MakeRequest(
+			suite.router,
+			t,
+			http.MethodGet,
+			fmt.Sprintf("/api/lists/%d", ListID),
+			bytes.NewBuffer([]byte{}),
+			headersUser,
+		)
+		require.Equal(suite.T(), http.StatusOK, code)
+		l := &models.List{}
+		require.NoError(t, json.Unmarshal(getRequestData, l))
+
+		require.Equal(t, updateList.Title, l.Title)
+		require.Equal(t, updateList.Description, l.Description)
+	})
+}

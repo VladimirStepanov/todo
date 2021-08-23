@@ -104,6 +104,13 @@ var deleteUser = &models.User{
 	ActivatedLink: "deleteUser",
 }
 
+var updateUser = &models.User{
+	Email:         "updateUser@mail.ru",
+	Password:      defaultSalt,
+	IsActivated:   true,
+	ActivatedLink: "updateUser",
+}
+
 var dataForInsert = []*models.User{
 	userForCreate,
 	notConfirmedUser,
@@ -115,6 +122,7 @@ var dataForInsert = []*models.User{
 	editRoleUser1,
 	editRoleUser2,
 	deleteUser,
+	updateUser,
 }
 
 var (
