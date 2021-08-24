@@ -7,7 +7,23 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/VladimirStepanov/todo-app/internal/models"
 	"github.com/stretchr/testify/require"
+)
+
+var (
+	ExpLists = []*models.List{
+		{
+			ID:          1,
+			Title:       "title#1",
+			Description: "description#1",
+		},
+		{
+			ID:          2,
+			Title:       "title#2",
+			Description: "description#2",
+		},
+	}
 )
 
 func MakeRequest(router http.Handler, t *testing.T, method, path string, input *bytes.Buffer, headers map[string]string) (int, []byte) {
