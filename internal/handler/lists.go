@@ -151,3 +151,14 @@ func (h *Handler) updateList(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"status": "success"})
 }
+
+func (h *Handler) getUserLists(c *gin.Context) {
+	result, err := h.ListService.GetUserLists(c.GetInt64(idCtx))
+
+	if err != nil {
+		h.InternalError(c, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"status": "success", "result": result})
+}
