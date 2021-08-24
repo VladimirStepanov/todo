@@ -285,3 +285,51 @@ func TestUpdate(t *testing.T) {
 		})
 	}
 }
+
+func TestGetUserLists(t *testing.T) {
+	result := []*models.List{
+		{
+			ID:          1,
+			Title:       "title#1",
+			Description: "description#1",
+		},
+		{
+			ID:          2,
+			Title:       "title#2",
+			Description: "description#2",
+		},
+	}
+
+	tests := []struct {
+		name   string
+		retErr error
+		expErr error
+		expRes []*models.List
+	}{
+		{
+			name:   "Return unknown error",
+			retErr: ErrSome,
+			expErr: ErrSome,
+			expRes: nil,
+		},
+		{
+			name:   "Success get",
+			retErr: nil,
+			expErr: nil,
+			expRes: result,
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			lr := new(mocks.ListRepository)
+			lr.On("GetUserLists", mock.Anything).Return(tc.expRes, tc.retErr)
+
+			ls := NewListService(lr)
+
+			res, err := ls.GetUserLists(1)
+			require.Equal(t, tc.expErr, err)
+			require.Equal(t, tc.expRes, res)
+		})
+	}
+}
