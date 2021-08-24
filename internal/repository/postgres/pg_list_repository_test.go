@@ -506,3 +506,74 @@ func TestUpdateList(t *testing.T) {
 		})
 	}
 }
+
+func TestGetUserLists(t *testing.T) {
+	mockDB, mock, err := sqlmock.New()
+
+	if err != nil {
+		t.Fatal("Error while sqlmock.New()", err)
+	}
+
+	defer mockDB.Close()
+
+	db := sqlx.NewDb(mockDB, "sqlmock")
+
+	lr := NewPostgresListRepository(db)
+
+	expLists := []*models.List{
+		{
+			ID:          1,
+			Title:       "title#1",
+			Description: "description#1",
+		},
+		{
+			ID:          2,
+			Title:       "title#2",
+			Description: "description#2",
+		},
+	}
+
+	tests := []struct {
+		name    string
+		setMock func(m sqlmock.Sqlmock, e error)
+		retErr  error
+		expErr  error
+		expRes  []*models.List
+	}{
+		{
+			name: "Return unknown error",
+			setMock: func(m sqlmock.Sqlmock, e error) {
+				m.ExpectQuery("SELECT id, title, description FROM lists").
+					WithArgs(1).
+					WillReturnError(e)
+			},
+			retErr: ErrUnknown,
+			expErr: ErrUnknown,
+			expRes: nil,
+		},
+		{
+			name: "Success get user lists",
+			setMock: func(m sqlmock.Sqlmock, e error) {
+				rows := sqlmock.NewRows([]string{"id", "title", "description"})
+				for _, r := range expLists {
+					rows.AddRow(r.ID, r.Title, r.Description)
+				}
+				m.ExpectQuery("SELECT id, title, description FROM lists").
+					WithArgs(1).
+					WillReturnRows(rows)
+			},
+			retErr: nil,
+			expErr: nil,
+			expRes: expLists,
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			tc.setMock(mock, tc.retErr)
+			res, err := lr.GetUserLists(1)
+			require.Equal(t, tc.expErr, err)
+			require.Equal(t, tc.expRes, res)
+		})
+	}
+}

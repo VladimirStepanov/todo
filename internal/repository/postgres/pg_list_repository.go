@@ -155,7 +155,20 @@ func (ls *PostgresListRepository) GetListByID(listID, userID int64) (*models.Lis
 }
 
 func (ls *PostgresListRepository) GetUserLists(userID int64) ([]*models.List, error) {
-	return nil, nil
+	res := []*models.List{}
+	err := ls.DB.Select(
+		&res,
+		`SELECT id, title, description
+		FROM lists l INNER JOIN users_lists ul on l.id = il.list_id
+		WHERE ul.user_id=$1`,
+		userID,
+	)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return res, nil
 }
 
 func (ls *PostgresListRepository) Delete(listID int64) error {
