@@ -159,7 +159,7 @@ func (ls *PostgresListRepository) GetUserLists(userID int64) ([]*models.List, er
 	err := ls.DB.Select(
 		&res,
 		`SELECT id, title, description
-		FROM lists l INNER JOIN users_lists ul on l.id = il.list_id
+		FROM lists l INNER JOIN users_lists ul on l.id = ul.list_id
 		WHERE ul.user_id=$1`,
 		userID,
 	)
