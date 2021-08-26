@@ -82,7 +82,7 @@ func (suite *TestingSuite) TestGetListByID() {
 
 	for _, tc := range tests {
 		suite.T().Run(tc.name, func(t *testing.T) {
-			code, listGetData := helpers.MakeRequest(
+			code, responseData := helpers.MakeRequest(
 				suite.router,
 				t,
 				http.MethodGet,
@@ -95,12 +95,12 @@ func (suite *TestingSuite) TestGetListByID() {
 
 			if tc.expErrMsg != "" {
 				errResp := &handler.ErrorResponse{}
-				err := json.Unmarshal(listGetData, errResp)
+				err := json.Unmarshal(responseData, errResp)
 				require.NoError(t, err)
 				require.Equal(t, tc.expErrMsg, errResp.Message)
 			} else {
 				userList := &models.List{}
-				err := json.Unmarshal(listGetData, userList)
+				err := json.Unmarshal(responseData, userList)
 				require.NoError(t, err)
 				require.Equal(t, tc.expList.Title, userList.Title)
 				require.Equal(t, tc.expList.Description, userList.Description)
@@ -171,7 +171,7 @@ func (suite *TestingSuite) TestEditRole() {
 
 	for _, tc := range tests {
 		suite.T().Run(tc.name, func(t *testing.T) {
-			code, editRoleData := helpers.MakeRequest(
+			code, responseData := helpers.MakeRequest(
 				suite.router,
 				t,
 				http.MethodPatch,
@@ -183,12 +183,12 @@ func (suite *TestingSuite) TestEditRole() {
 
 			if tc.expErrMsg != "" {
 				errResp := &handler.ErrorResponse{}
-				err := json.Unmarshal(editRoleData, errResp)
+				err := json.Unmarshal(responseData, errResp)
 				require.NoError(t, err)
 				require.Equal(t, tc.expErrMsg, errResp.Message)
 			} else {
 				actResp := map[string]interface{}{}
-				err := json.Unmarshal(editRoleData, &actResp)
+				err := json.Unmarshal(responseData, &actResp)
 				require.NoError(t, err)
 				require.Equal(t, "success", actResp["status"])
 			}
@@ -247,7 +247,7 @@ func (suite *TestingSuite) TestDeleteList() {
 
 	for _, tc := range tests {
 		suite.T().Run(tc.name, func(t *testing.T) {
-			code, editRoleData := helpers.MakeRequest(
+			code, responseData := helpers.MakeRequest(
 				suite.router,
 				t,
 				http.MethodDelete,
@@ -259,12 +259,12 @@ func (suite *TestingSuite) TestDeleteList() {
 
 			if tc.expErrMsg != "" {
 				errResp := &handler.ErrorResponse{}
-				err := json.Unmarshal(editRoleData, errResp)
+				err := json.Unmarshal(responseData, errResp)
 				require.NoError(t, err)
 				require.Equal(t, tc.expErrMsg, errResp.Message)
 			} else {
 				actResp := map[string]interface{}{}
-				err := json.Unmarshal(editRoleData, &actResp)
+				err := json.Unmarshal(responseData, &actResp)
 				require.NoError(t, err)
 				require.Equal(t, "success", actResp["status"])
 			}
@@ -350,7 +350,7 @@ func (suite *TestingSuite) TestUpdateList() {
 
 	for _, tc := range tests {
 		suite.T().Run(tc.name, func(t *testing.T) {
-			code, editRoleData := helpers.MakeRequest(
+			code, responseData := helpers.MakeRequest(
 				suite.router,
 				t,
 				http.MethodPatch,
@@ -362,12 +362,12 @@ func (suite *TestingSuite) TestUpdateList() {
 
 			if tc.expErrMsg != "" {
 				errResp := &handler.ErrorResponse{}
-				err := json.Unmarshal(editRoleData, errResp)
+				err := json.Unmarshal(responseData, errResp)
 				require.NoError(t, err)
 				require.Equal(t, tc.expErrMsg, errResp.Message)
 			} else {
 				actResp := map[string]interface{}{}
-				err := json.Unmarshal(editRoleData, &actResp)
+				err := json.Unmarshal(responseData, &actResp)
 				require.NoError(t, err)
 				require.Equal(t, "success", actResp["status"])
 			}
@@ -375,7 +375,7 @@ func (suite *TestingSuite) TestUpdateList() {
 	}
 
 	suite.T().Run("Check update result", func(t *testing.T) {
-		code, getRequestData := helpers.MakeRequest(
+		code, getresponseData := helpers.MakeRequest(
 			suite.router,
 			t,
 			http.MethodGet,
@@ -385,7 +385,7 @@ func (suite *TestingSuite) TestUpdateList() {
 		)
 		require.Equal(suite.T(), http.StatusOK, code)
 		l := &models.List{}
-		require.NoError(t, json.Unmarshal(getRequestData, l))
+		require.NoError(t, json.Unmarshal(getresponseData, l))
 
 		require.Equal(t, updateList.Title, l.Title)
 		require.Equal(t, updateList.Description, l.Description)
@@ -413,7 +413,7 @@ func (suite *TestingSuite) TestGetUserLists() {
 	}
 
 	suite.T().Run("Check get users lists", func(t *testing.T) {
-		code, data := helpers.MakeRequest(
+		code, responseData := helpers.MakeRequest(
 			suite.router,
 			t,
 			http.MethodGet,
@@ -423,7 +423,7 @@ func (suite *TestingSuite) TestGetUserLists() {
 		)
 		require.Equal(t, http.StatusOK, code)
 		resp := handler.UserListsResponse{}
-		require.NoError(t, json.Unmarshal(data, &resp))
+		require.NoError(t, json.Unmarshal(responseData, &resp))
 		require.Equal(t, "success", resp.Status)
 		for i, l := range resp.Result {
 			require.Equal(t, helpers.ExpLists[i].Title, l.Title)
