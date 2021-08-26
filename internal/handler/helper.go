@@ -4,8 +4,14 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/VladimirStepanov/todo-app/internal/models"
 	"github.com/gin-gonic/gin"
 )
+
+type UserListsResponse struct {
+	Status string         `json:"status"`
+	Result []*models.List `json:"result"`
+}
 
 type ListCreateResponse struct {
 	Status string `json:"status"`

@@ -476,11 +476,6 @@ func TestUpdateList(t *testing.T) {
 	}
 }
 
-type GetResultData struct {
-	Status string         `json:"status"`
-	Result []*models.List `json:"result"`
-}
-
 func TestGetUserLists(t *testing.T) {
 	headers := map[string]string{"Authorization": "Bearer token"}
 
@@ -538,7 +533,7 @@ func TestGetUserLists(t *testing.T) {
 				require.Equal(t, "error", actResp["status"])
 				require.Equal(t, tc.errMsg, actResp["message"])
 			} else {
-				resp := GetResultData{}
+				resp := UserListsResponse{}
 				require.NoError(t, json.Unmarshal(data, &resp))
 				require.Equal(t, "success", resp.Status)
 				require.Equal(t, tc.expLists, resp.Result)
