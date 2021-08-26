@@ -391,3 +391,43 @@ func (suite *TestingSuite) TestUpdateList() {
 		require.Equal(t, updateList.Description, l.Description)
 	})
 }
+
+func (suite *TestingSuite) TestGetUserLists() {
+	siginInputUser := fmt.Sprintf(
+		`{"email": "%s", "password": "%s"}`,
+		updateUser.Email, defaultPassword,
+	)
+
+	authRespUser := makeSignIn(suite.T(), suite.router, siginInputUser)
+
+	headersUser := map[string]string{
+		"Authorization": fmt.Sprintf("Bearer %s", authRespUser.AccessToken),
+	}
+
+	for _, l := range helpers.ExpLists {
+		listInput := fmt.Sprintf(
+			`{"title": "%s", "description": "%s"}`,
+			l.Title, l.Description,
+		)
+		createList(suite.T(), suite.router, listInput, headersUser)
+	}
+
+	suite.T().Run("Check get users lists", func(t *testing.T) {
+		code, data := helpers.MakeRequest(
+			suite.router,
+			t,
+			http.MethodGet,
+			"/api/lists",
+			bytes.NewBuffer([]byte{}),
+			headersUser,
+		)
+		require.Equal(t, http.StatusOK, code)
+		resp := handler.UserListsResponse{}
+		require.NoError(t, json.Unmarshal(data, &resp))
+		require.Equal(t, "success", resp.Status)
+		for i, l := range resp.Result {
+			require.Equal(t, helpers.ExpLists[i].Title, l.Title)
+			require.Equal(t, helpers.ExpLists[i].Description, l.Description)
+		}
+	})
+}
