@@ -9,7 +9,7 @@ import (
 	"github.com/VladimirStepanov/todo-app/internal/repository/redisrepo"
 	"github.com/VladimirStepanov/todo-app/internal/server"
 	"github.com/VladimirStepanov/todo-app/internal/service"
-	"github.com/sirupsen/logrus"
+	"github.com/VladimirStepanov/todo-app/pkg/logging"
 )
 
 func main() {
@@ -46,8 +46,10 @@ func main() {
 		cfg.MaxLoggedIn, tokenRepo,
 	)
 
-	logger := logrus.New()
-	logger.SetFormatter(&logrus.JSONFormatter{})
+	logger, err := logging.GetLogger("trace", "log.txt")
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	handler := handler.New(userService, mailService, tokenService, listService, logger)
 

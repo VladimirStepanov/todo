@@ -16,9 +16,21 @@ type Handler struct {
 	logger       *logrus.Logger
 }
 
+func (h *Handler) AccessLogger(c *gin.Context) {
+	c.Next()
+
+	h.logger.WithFields(logrus.Fields{
+		"path":   c.Request.URL.Path,
+		"method": c.Request.Method,
+		"code":   c.Writer.Status(),
+	}).Info("access")
+}
+
 func (h *Handler) InitRoutes(mode string) http.Handler {
 	gin.SetMode(mode)
 	r := gin.New()
+
+	r.Use(h.AccessLogger)
 
 	auth := r.Group("/auth")
 	{
