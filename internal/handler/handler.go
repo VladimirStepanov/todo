@@ -52,15 +52,15 @@ func (h *Handler) InitRoutes(mode string) http.Handler {
 			lists.PATCH("/:list_id/edit-role", h.onlyAdminAccessMiddleware, h.editRole)
 			lists.DELETE("/:list_id", h.onlyAdminAccessMiddleware, h.deleteList)
 
-			// items := lists.Group("/:list_id/items")
-			// {
-			// 	items.POST("", h.itemCreate)
-			// 	items.GET("", h.getItems)
-			// 	items.GET("/:item_id", h.getItemByID)
-			// 	items.PATCH("/:item_id", h.updateItem)
-			// 	items.PATCH("/:item_id/done", h.doneItem)
-			// 	items.DELETE("/:item_id", h.deleteItem)
-			// }
+			items := lists.Group("/:list_id/items", h.checkAccessToListMiddleware)
+			{
+				items.POST("", h.itemCreate)
+				items.GET("", h.getItems)
+				items.GET("/:item_id", h.getItemByID)
+				items.PATCH("/:item_id", h.updateItem)
+				items.PATCH("/:item_id/done", h.doneItem)
+				items.DELETE("/:item_id", h.deleteItem)
+			}
 		}
 	}
 	return r
