@@ -106,3 +106,28 @@ func (h *Handler) onlyAdminAccessMiddleware(c *gin.Context) {
 
 	c.Next()
 }
+
+func (h *Handler) checkAccessToListMiddleware(c *gin.Context) {
+	err := h.checkAdminAccess(c)
+
+	if err != nil && err != models.ErrNoListAccess {
+		switch err {
+		case models.ErrBadParam:
+			c.JSON(http.StatusBadRequest, gin.H{
+				"status":  "error",
+				"message": err.Error(),
+			})
+
+		case models.ErrNoList:
+			c.JSON(http.StatusNotFound, gin.H{
+				"status":  "error",
+				"message": err.Error(),
+			})
+		default:
+			h.InternalError(c, err)
+		}
+		c.Abort()
+		return
+	}
+	c.Next()
+}
