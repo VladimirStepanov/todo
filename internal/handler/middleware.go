@@ -62,28 +62,31 @@ func (h *Handler) authMiddleware(c *gin.Context) {
 	c.Next()
 }
 
-func (h *Handler) onlyAdminAccess(c *gin.Context) {
+func (h *Handler) checkAdminAccess(c *gin.Context) error {
 	userID, err := h.GetUserId(c)
 	if err != nil {
-		h.InternalError(c, err)
-		c.Abort()
-		return
+		return err
 	}
 
 	listID, err := strconv.ParseInt(c.Param("list_id"), 10, 64)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"status":  "error",
-			"message": models.ErrBadParam.Error(),
-		})
-		c.Abort()
-		return
+		return models.ErrBadParam
 	}
 
-	err = h.ListService.IsListAdmin(listID, userID)
+	return h.ListService.IsListAdmin(listID, userID)
+}
+
+func (h *Handler) onlyAdminAccessMiddleware(c *gin.Context) {
+	err := h.checkAdminAccess(c)
 
 	if err != nil {
 		switch err {
+		case models.ErrBadParam:
+			c.JSON(http.StatusBadRequest, gin.H{
+				"status":  "error",
+				"message": err.Error(),
+			})
+
 		case models.ErrNoList:
 			c.JSON(http.StatusNotFound, gin.H{
 				"status":  "error",
