@@ -194,18 +194,20 @@ func (suite *TestingSuite) SetupSuite() {
 	repo := postgres.NewPostgresUserRepository(db)
 	listRepo := postgres.NewPostgresListRepository(db)
 	tokenRepo := redisrepo.NewRedisRepository(redisClient)
+	itemRepo := postgres.NewPostgresItemRepository(db)
 	userService := service.NewUserService(repo)
 	tokenService := service.NewTokenService(
 		accessKey, refreshKey, maxLoggenInCount, tokenRepo,
 	)
 	listService := service.NewListService(listRepo)
+	itemService := service.NewItemService(itemRepo)
 	msObj := new(mocks.MailService)
 	msObj.On("SendConfirmationsEmail", mock.Anything).Return(nil)
 	logger := logrus.New()
 	logger.Out = ioutil.Discard
 	suite.router = handler.New(
 		userService, msObj,
-		tokenService, listService,
+		tokenService, listService, itemService,
 		logger).InitRoutes(gin.TestMode)
 }
 

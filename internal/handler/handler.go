@@ -13,6 +13,7 @@ type Handler struct {
 	MailService  models.MailService
 	TokenService models.TokenService
 	ListService  models.ListService
+	ItemService  models.ItemService
 	logger       *logrus.Logger
 }
 
@@ -71,6 +72,7 @@ func New(
 	MailService models.MailService,
 	TokenService models.TokenService,
 	ListService models.ListService,
+	ItemService models.ItemService,
 	logger *logrus.Logger) *Handler {
 
 	return &Handler{
@@ -78,5 +80,6 @@ func New(
 		MailService:  MailService,
 		TokenService: TokenService,
 		ListService:  ListService,
+		ItemService:  ItemService,
 		logger:       logger}
 }

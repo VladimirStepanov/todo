@@ -38,9 +38,11 @@ func main() {
 	listRepo := postgres.NewPostgresListRepository(db)
 	tokenRepo := redisrepo.NewRedisRepository(redisClient)
 	userRepo := postgres.NewPostgresUserRepository(db)
+	itemRepo := postgres.NewPostgresItemRepository(db)
 	userService := service.NewUserService(userRepo)
 	mailService := service.NewMailService(cfg.Email, cfg.EmailPassword, cfg.Domain)
 	listService := service.NewListService(listRepo)
+	itemService := service.NewItemService(itemRepo)
 	tokenService := service.NewTokenService(
 		cfg.AccessKey, cfg.RefreshKey,
 		cfg.MaxLoggedIn, tokenRepo,
@@ -51,7 +53,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	handler := handler.New(userService, mailService, tokenService, listService, logger)
+	handler := handler.New(userService, mailService, tokenService, listService, itemService, logger)
 
 	srv := server.New(cfg.GetServerAddr(), handler.InitRoutes(cfg.Mode))
 	if err := srv.Run(); err != nil {

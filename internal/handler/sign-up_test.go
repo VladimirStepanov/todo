@@ -27,7 +27,7 @@ func TestSendMailReturnForSignUp(t *testing.T) {
 	msObj.On("SendConfirmationsEmail", mock.Anything).Return(errors.New("Send mail error"))
 	usObj.On("Create", mock.Anything, mock.Anything).Return(nil, nil)
 
-	handler := New(usObj, msObj, nil, nil, getTestLogger())
+	handler := New(usObj, msObj, nil, nil, nil, getTestLogger())
 	r := handler.InitRoutes(gin.TestMode)
 	code, _ := helpers.MakeRequest(
 		r,
@@ -60,7 +60,7 @@ func TestCreateErrorForSignUp(t *testing.T) {
 			msObj.On("SendConfirmationsEmail", mock.Anything).Return(nil)
 			usObj.On("Create", mock.Anything, mock.Anything).Return(nil, tc.retErr)
 
-			handler := New(usObj, msObj, nil, nil, getTestLogger())
+			handler := New(usObj, msObj, nil, nil, nil, getTestLogger())
 			r := handler.InitRoutes(gin.TestMode)
 			code, _ := helpers.MakeRequest(
 				r,
@@ -83,7 +83,7 @@ func TestBadContentType(t *testing.T) {
 	msObj := new(mocks.MailService)
 	msObj.On("SendConfirmationsEmail", mock.Anything).Return(nil)
 
-	handler := New(usObj, msObj, nil, nil, getTestLogger())
+	handler := New(usObj, msObj, nil, nil, nil, getTestLogger())
 	r := handler.InitRoutes(gin.TestMode)
 	req := httptest.NewRequest(http.MethodPost, "/auth/sign-up", nil)
 	w := httptest.NewRecorder()
@@ -158,7 +158,7 @@ func TestSignUpInput(t *testing.T) {
 			msObj := new(mocks.MailService)
 			msObj.On("SendConfirmationsEmail", mock.Anything).Return(nil)
 
-			handler := New(usObj, msObj, nil, nil, getTestLogger())
+			handler := New(usObj, msObj, nil, nil, nil, getTestLogger())
 			r := handler.InitRoutes(gin.TestMode)
 			code, data := helpers.MakeRequest(
 				r,

@@ -77,7 +77,7 @@ func TestListCreate(t *testing.T) {
 				tc.verifyRetUserID, tc.verifyRetUserUUID, tc.verifyRerErr,
 			)
 
-			handler := New(nil, nil, tsObj, ls, getTestLogger())
+			handler := New(nil, nil, tsObj, ls, nil, getTestLogger())
 			r := handler.InitRoutes(gin.TestMode)
 			code, data := helpers.MakeRequest(
 				r,
@@ -179,7 +179,7 @@ func TestGetListByID(t *testing.T) {
 				tc.verifyRetUserID, tc.verifyRetUserUUID,
 				tc.verifyRerErr,
 			)
-			handler := New(nil, nil, tsObj, ls, getTestLogger())
+			handler := New(nil, nil, tsObj, ls, nil, getTestLogger())
 			r := handler.InitRoutes(gin.TestMode)
 			code, data := helpers.MakeRequest(
 				r,
@@ -287,7 +287,7 @@ func TestEditRole(t *testing.T) {
 				tc.editRoleRet,
 			)
 
-			handler := New(nil, nil, tsObj, ls, getTestLogger())
+			handler := New(nil, nil, tsObj, ls, nil, getTestLogger())
 			r := handler.InitRoutes(gin.TestMode)
 			code, data := helpers.MakeRequest(
 				r,
@@ -366,7 +366,7 @@ func TestDeleteList(t *testing.T) {
 				tc.deleteRetErr,
 			)
 
-			handler := New(nil, nil, tsObj, ls, getTestLogger())
+			handler := New(nil, nil, tsObj, ls, nil, getTestLogger())
 			r := handler.InitRoutes(gin.TestMode)
 			code, data := helpers.MakeRequest(
 				r,
@@ -452,7 +452,7 @@ func TestUpdateList(t *testing.T) {
 				tc.updateRetErr,
 			)
 
-			handler := New(nil, nil, tsObj, ls, getTestLogger())
+			handler := New(nil, nil, tsObj, ls, nil, getTestLogger())
 			r := handler.InitRoutes(gin.TestMode)
 			code, data := helpers.MakeRequest(
 				r,
@@ -515,7 +515,7 @@ func TestGetUserLists(t *testing.T) {
 				tc.retErr,
 			)
 
-			handler := New(nil, nil, tsObj, ls, getTestLogger())
+			handler := New(nil, nil, tsObj, ls, nil, getTestLogger())
 			r := handler.InitRoutes(gin.TestMode)
 			code, data := helpers.MakeRequest(
 				r,
