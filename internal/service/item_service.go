@@ -13,7 +13,7 @@ func NewItemService(repo models.ItemRepository) models.ItemService {
 }
 
 func (is *ItemService) Create(title, description string, listID int64) (int64, error) {
-	return 0, nil
+	return is.repo.Create(title, description, listID)
 }
 
 func (is *ItemService) GetItems(listID int64) ([]*models.Item, error) {
