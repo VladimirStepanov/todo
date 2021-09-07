@@ -21,7 +21,7 @@ func (is *ItemService) GetItems(listID int64) ([]*models.Item, error) {
 }
 
 func (is *ItemService) GetItemBydID(listID, itemID int64) (*models.Item, error) {
-	return nil, nil
+	return is.repo.GetItemBydID(listID, itemID)
 }
 
 func (is *ItemService) Update(listID, itemID int64, item *models.UpdateItemReq) error {
