@@ -15,11 +15,11 @@ func NewPostgresItemRepository(db *sqlx.DB) models.ItemRepository {
 	}
 }
 
-func (is *PostgresItemRepository) Create(title, description string, listID int64) (int64, error) {
+func (ir *PostgresItemRepository) Create(title, description string, listID int64) (int64, error) {
 	var itemID int64
 
-	err := is.DB.QueryRow(
-		`INSERT INTO items(list_id, title, description) VALUES($1, $2, $3) RETURNING id`,
+	err := ir.DB.QueryRow(
+		`INSERT INTO items(liir_id, title, description) VALUES($1, $2, $3) RETURNING id`,
 		listID, title, description,
 	).Scan(&itemID)
 
@@ -30,18 +30,18 @@ func (is *PostgresItemRepository) Create(title, description string, listID int64
 	return itemID, nil
 }
 
-func (is *PostgresItemRepository) GetItems(listID int64) ([]*models.Item, error) {
+func (ir *PostgresItemRepository) GetItems(listID int64) ([]*models.Item, error) {
 	return nil, nil
 }
 
-func (is *PostgresItemRepository) GetItemBydID(listID, itemID int64) (*models.Item, error) {
+func (ir *PostgresItemRepository) GetItemBydID(listID, itemID int64) (*models.Item, error) {
 	return nil, nil
 }
 
-func (is *PostgresItemRepository) Update(listID, itemID int64, item *models.UpdateItemReq) error {
+func (ir *PostgresItemRepository) Update(listID, itemID int64, item *models.UpdateItemReq) error {
 	return nil
 }
 
-func (is *PostgresItemRepository) Delete(listID, itemID int64) error {
+func (ir *PostgresItemRepository) Delete(listID, itemID int64) error {
 	return nil
 }
