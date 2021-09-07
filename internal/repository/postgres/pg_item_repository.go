@@ -1,6 +1,8 @@
 package postgres
 
 import (
+	"database/sql"
+
 	"github.com/VladimirStepanov/todo-app/internal/models"
 	"github.com/jmoiron/sqlx"
 )
@@ -35,7 +37,17 @@ func (ir *PostgresItemRepository) GetItems(listID int64) ([]*models.Item, error)
 }
 
 func (ir *PostgresItemRepository) GetItemBydID(listID, itemID int64) (*models.Item, error) {
-	return nil, nil
+	res := &models.Item{}
+
+	err := ir.DB.Get(res, "SELECT * FROM items WHERE list_id=$1 AND id=$2", listID, itemID)
+
+	if err != nil {
+		if err == sql.ErrNoRows {
+			err = models.ErrNoItem
+		}
+		return nil, err
+	}
+	return res, nil
 }
 
 func (ir *PostgresItemRepository) Update(listID, itemID int64, item *models.UpdateItemReq) error {
