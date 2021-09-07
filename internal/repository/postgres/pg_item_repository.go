@@ -36,7 +36,7 @@ func (ir *PostgresItemRepository) GetItems(listID int64) ([]*models.Item, error)
 	return nil, nil
 }
 
-func (ir *PostgresItemRepository) GetItemBydID(listID, itemID int64) (*models.Item, error) {
+func (ir *PostgresItemRepository) GetItemByID(listID, itemID int64) (*models.Item, error) {
 	res := &models.Item{}
 
 	err := ir.DB.Get(res, "SELECT * FROM items WHERE list_id=$1 AND id=$2", listID, itemID)

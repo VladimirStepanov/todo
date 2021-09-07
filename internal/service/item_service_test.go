@@ -92,11 +92,11 @@ func TestGetItemByID(t *testing.T) {
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
 			ir := new(mocks.ItemRepository)
-			ir.On("GetItemBydID", mock.Anything, mock.Anything).Return(tc.retItem, tc.retErr)
+			ir.On("GetItemByID", mock.Anything, mock.Anything).Return(tc.retItem, tc.retErr)
 
 			is := NewItemService(ir)
 
-			retItem, err := is.GetItemBydID(testItem.ListID, testItem.ID)
+			retItem, err := is.GetItemByID(testItem.ListID, testItem.ID)
 			require.Equal(t, tc.expItem, retItem)
 			require.Equal(t, tc.expErr, err)
 		})

@@ -55,7 +55,7 @@ type ListRepository interface {
 type ItemService interface {
 	Create(title, description string, listID int64) (int64, error)
 	GetItems(listID int64) ([]*Item, error)
-	GetItemBydID(listID, itemID int64) (*Item, error)
+	GetItemByID(listID, itemID int64) (*Item, error)
 	Update(listID, itemID int64, item *UpdateItemReq) error
 	Done(listID, itemID int64) error
 	Delete(listID, itemID int64) error
@@ -64,7 +64,7 @@ type ItemService interface {
 type ItemRepository interface {
 	Create(title, description string, listID int64) (int64, error)
 	GetItems(listID int64) ([]*Item, error)
-	GetItemBydID(listID, itemID int64) (*Item, error)
+	GetItemByID(listID, itemID int64) (*Item, error)
 	Update(listID, itemID int64, item *UpdateItemReq) error
 	Delete(listID, itemID int64) error
 }

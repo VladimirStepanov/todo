@@ -47,8 +47,8 @@ func (_m *ItemRepository) Delete(listID int64, itemID int64) error {
 	return r0
 }
 
-// GetItemBydID provides a mock function with given fields: listID, itemID
-func (_m *ItemRepository) GetItemBydID(listID int64, itemID int64) (*models.Item, error) {
+// GetItemByID provides a mock function with given fields: listID, itemID
+func (_m *ItemRepository) GetItemByID(listID int64, itemID int64) (*models.Item, error) {
 	ret := _m.Called(listID, itemID)
 
 	var r0 *models.Item

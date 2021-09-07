@@ -139,7 +139,7 @@ func TestGetItem(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			tc.setMock(mock, tc.retErr)
 
-			retItem, err := ir.GetItemBydID(testList.ID, 1)
+			retItem, err := ir.GetItemByID(testList.ID, 1)
 			require.Equal(t, tc.expErr, err)
 
 			if err == nil {
