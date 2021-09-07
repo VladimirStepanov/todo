@@ -15,7 +15,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestAccessListMiddleware(t *testing.T) {
+func TestItemCreate(t *testing.T) {
 	headers := map[string]string{"Authorization": "Bearer token"}
 
 	tests := []struct {
