@@ -15,6 +15,16 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+var (
+	testItem = &models.Item{
+		ID:          1,
+		ListID:      testList.ID,
+		Title:       "hello",
+		Description: "world",
+		Done:        true,
+	}
+)
+
 func TestItemCreate(t *testing.T) {
 	headers := map[string]string{"Authorization": "Bearer token"}
 
@@ -111,4 +121,102 @@ func TestItemCreate(t *testing.T) {
 		})
 	}
 
+}
+
+func TestGetItemByID(t *testing.T) {
+	headers := map[string]string{"Authorization": "Bearer token"}
+	tests := []struct {
+		name       string
+		listID     string
+		itemID     string
+		getRetItem *models.Item
+		getRetErr  error
+		code       int
+		expItem    *models.Item
+		errMsg     string
+	}{
+		{
+			name:       "Bad itemID",
+			listID:     "1",
+			itemID:     "bad",
+			getRetItem: nil,
+			getRetErr:  nil,
+			code:       http.StatusBadRequest,
+			expItem:    nil,
+			errMsg:     models.ErrBadParam.Error(),
+		},
+		{
+			name:       "Item not found",
+			listID:     "1",
+			itemID:     "2",
+			getRetItem: nil,
+			getRetErr:  models.ErrNoItem,
+			code:       http.StatusNotFound,
+			expItem:    nil,
+			errMsg:     models.ErrNoItem.Error(),
+		},
+		{
+			name:       "GetItemByID return unknown error",
+			listID:     "1",
+			itemID:     "2",
+			getRetItem: nil,
+			getRetErr:  ErrUnknown,
+			code:       http.StatusInternalServerError,
+			expItem:    nil,
+			errMsg:     "Internal server error",
+		},
+		{
+			name:       "Success",
+			listID:     fmt.Sprintf("%d", testList.ID),
+			itemID:     fmt.Sprintf("%d", testItem.ID),
+			getRetItem: testItem,
+			getRetErr:  nil,
+			code:       http.StatusOK,
+			expItem:    testItem,
+			errMsg:     "Internal server error",
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			tsObj := new(mocks.TokenService)
+			tsObj.On("Verify", mock.Anything).Return(
+				int64(1), "aaa-aaa-aaa-aaa", nil,
+			)
+
+			ls := new(mocks.ListService)
+			ls.On("IsListAdmin", mock.Anything, mock.Anything).Return(
+				nil,
+			)
+
+			is := new(mocks.ItemService)
+			is.On("GetItemByID", mock.Anything, mock.Anything).Return(
+				tc.getRetItem, tc.getRetErr,
+			)
+
+			handler := New(nil, nil, tsObj, ls, is, getTestLogger())
+			r := handler.InitRoutes(gin.TestMode)
+			code, data := helpers.MakeRequest(
+				r,
+				t,
+				http.MethodGet,
+				fmt.Sprintf("/api/lists/%s/items/%s", tc.listID, tc.itemID),
+				bytes.NewBuffer([]byte{}),
+				headers,
+			)
+			require.Equal(t, tc.code, code)
+			if tc.code != 200 {
+				errResp := &ErrorResponse{}
+				err := json.Unmarshal(data, errResp)
+				require.NoError(t, err)
+				require.Equal(t, "error", errResp.Status)
+				require.Equal(t, tc.errMsg, errResp.Message)
+			} else {
+				item := &models.Item{}
+				err := json.Unmarshal(data, item)
+				require.NoError(t, err)
+				require.Equal(t, tc.expItem, item)
+			}
+		})
+	}
 }
