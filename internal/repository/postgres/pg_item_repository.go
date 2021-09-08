@@ -21,7 +21,7 @@ func (ir *PostgresItemRepository) Create(title, description string, listID int64
 	var itemID int64
 
 	err := ir.DB.QueryRow(
-		`INSERT INTO items(liir_id, title, description) VALUES($1, $2, $3) RETURNING id`,
+		`INSERT INTO items(list_id, title, description) VALUES($1, $2, $3) RETURNING id`,
 		listID, title, description,
 	).Scan(&itemID)
 
