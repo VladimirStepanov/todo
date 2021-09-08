@@ -13,6 +13,11 @@ type UserListsResponse struct {
 	Result []*models.List `json:"result"`
 }
 
+type ItemCreateResponse struct {
+	Status string `json:"status"`
+	ItemID int64  `json:"item_id"`
+}
+
 type ListCreateResponse struct {
 	Status string `json:"status"`
 	ListID int64  `json:"list_id"`
