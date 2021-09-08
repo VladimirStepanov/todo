@@ -45,11 +45,11 @@ func (suite *TestingSuite) TestGetListByID() {
 		listForCreate.Title, listForCreate.Description,
 	)
 
-	siginInput := fmt.Sprintf(
+	signInInput := fmt.Sprintf(
 		`{"email": "%s", "password": "%s"}`,
 		createListUser.Email, defaultPassword,
 	)
-	authResp := makeSignIn(suite.T(), suite.router, siginInput)
+	authResp := makeSignIn(suite.T(), suite.router, signInInput)
 
 	headers := map[string]string{
 		"Authorization": fmt.Sprintf("Bearer %s", authResp.AccessToken),
@@ -117,17 +117,17 @@ func (suite *TestingSuite) TestEditRole() {
 		listForCreate.Title, listForCreate.Description,
 	)
 
-	siginInputUser1 := fmt.Sprintf(
+	signInInputUser1 := fmt.Sprintf(
 		`{"email": "%s", "password": "%s"}`,
 		editRoleUser1.Email, defaultPassword,
 	)
-	siginInputUser2 := fmt.Sprintf(
+	signInInputUser2 := fmt.Sprintf(
 		`{"email": "%s", "password": "%s"}`,
 		editRoleUser2.Email, defaultPassword,
 	)
 
-	authRespUser1 := makeSignIn(suite.T(), suite.router, siginInputUser1)
-	authRespUser2 := makeSignIn(suite.T(), suite.router, siginInputUser2)
+	authRespUser1 := makeSignIn(suite.T(), suite.router, signInInputUser1)
+	authRespUser2 := makeSignIn(suite.T(), suite.router, signInInputUser2)
 
 	headersUser1 := map[string]string{
 		"Authorization": fmt.Sprintf("Bearer %s", authRespUser1.AccessToken),
@@ -212,12 +212,12 @@ func (suite *TestingSuite) TestDeleteList() {
 		`{"title": "%s", "description": "%s"}`,
 		listForCreate.Title, listForCreate.Description,
 	)
-	siginInputUser := fmt.Sprintf(
+	signInInputUser := fmt.Sprintf(
 		`{"email": "%s", "password": "%s"}`,
 		deleteUser.Email, defaultPassword,
 	)
 
-	authRespUser := makeSignIn(suite.T(), suite.router, siginInputUser)
+	authRespUser := makeSignIn(suite.T(), suite.router, signInInputUser)
 
 	headersUser := map[string]string{
 		"Authorization": fmt.Sprintf("Bearer %s", authRespUser.AccessToken),
@@ -295,12 +295,12 @@ func (suite *TestingSuite) TestUpdateList() {
 		`{"title": "%s", "description": "%s"}`,
 		listForCreate.Title, listForCreate.Description,
 	)
-	siginInputUser := fmt.Sprintf(
+	signInInputUser := fmt.Sprintf(
 		`{"email": "%s", "password": "%s"}`,
 		updateUser.Email, defaultPassword,
 	)
 
-	authRespUser := makeSignIn(suite.T(), suite.router, siginInputUser)
+	authRespUser := makeSignIn(suite.T(), suite.router, signInInputUser)
 
 	headersUser := map[string]string{
 		"Authorization": fmt.Sprintf("Bearer %s", authRespUser.AccessToken),
@@ -393,12 +393,12 @@ func (suite *TestingSuite) TestUpdateList() {
 }
 
 func (suite *TestingSuite) TestGetUserLists() {
-	siginInputUser := fmt.Sprintf(
+	signInInputUser := fmt.Sprintf(
 		`{"email": "%s", "password": "%s"}`,
 		updateUser.Email, defaultPassword,
 	)
 
-	authRespUser := makeSignIn(suite.T(), suite.router, siginInputUser)
+	authRespUser := makeSignIn(suite.T(), suite.router, signInInputUser)
 
 	headersUser := map[string]string{
 		"Authorization": fmt.Sprintf("Bearer %s", authRespUser.AccessToken),
