@@ -148,3 +148,64 @@ func TestGetItem(t *testing.T) {
 		})
 	}
 }
+
+func TestDeleteItem(t *testing.T) {
+	mockDB, mock, err := sqlmock.New()
+
+	if err != nil {
+		t.Fatal("Error while sqlmock.New()", err)
+	}
+
+	defer mockDB.Close()
+
+	db := sqlx.NewDb(mockDB, "sqlmock")
+
+	ir := NewPostgresItemRepository(db)
+
+	tests := []struct {
+		name    string
+		setMock func(m sqlmock.Sqlmock, e error)
+		retErr  error
+		expErr  error
+	}{
+		{
+			name: "Delete unknown error",
+			setMock: func(m sqlmock.Sqlmock, e error) {
+				m.ExpectExec("DELETE FROM items").
+					WithArgs(1, 1).
+					WillReturnError(e)
+			},
+			retErr: ErrUnknown,
+			expErr: ErrUnknown,
+		},
+		{
+			name: "Delete return ErrNoItem",
+			setMock: func(m sqlmock.Sqlmock, e error) {
+				m.ExpectExec("DELETE FROM items").
+					WithArgs(1, 1).
+					WillReturnResult(sqlmock.NewResult(0, 0))
+			},
+			retErr: nil,
+			expErr: models.ErrNoItem,
+		},
+		{
+			name: "Success delete",
+			setMock: func(m sqlmock.Sqlmock, e error) {
+				m.ExpectExec("DELETE FROM items").
+					WithArgs(1, 1).
+					WillReturnResult(sqlmock.NewResult(1, 1))
+			},
+			retErr: nil,
+			expErr: nil,
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			tc.setMock(mock, tc.retErr)
+
+			err := ir.Delete(1, 1)
+			require.Equal(t, tc.expErr, err)
+		})
+	}
+}

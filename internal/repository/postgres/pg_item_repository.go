@@ -55,5 +55,21 @@ func (ir *PostgresItemRepository) Update(listID, itemID int64, item *models.Upda
 }
 
 func (ir *PostgresItemRepository) Delete(listID, itemID int64) error {
+	res, err := ir.DB.Exec("DELETE FROM items WHERE id=$1 AND list_id=$2", itemID, listID)
+
+	if err != nil {
+		return err
+	}
+
+	ra, err := res.RowsAffected()
+
+	if err != nil {
+		return err
+	}
+
+	if ra == 0 {
+		return models.ErrNoItem
+	}
+
 	return nil
 }
