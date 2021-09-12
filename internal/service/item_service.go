@@ -33,5 +33,5 @@ func (is *ItemService) Done(listID, itemID int64) error {
 }
 
 func (is *ItemService) Delete(listID, itemID int64) error {
-	return nil
+	return is.repo.Delete(listID, itemID)
 }

@@ -102,3 +102,39 @@ func TestGetItemByID(t *testing.T) {
 		})
 	}
 }
+
+func TestDeleteItem(t *testing.T) {
+	tests := []struct {
+		name   string
+		retErr error
+		expErr error
+	}{
+		{
+			name:   "Return unknown error",
+			retErr: ErrSome,
+			expErr: ErrSome,
+		},
+		{
+			name:   "Item not found",
+			retErr: models.ErrNoItem,
+			expErr: models.ErrNoItem,
+		},
+		{
+			name:   "Success delete",
+			retErr: nil,
+			expErr: nil,
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			ir := new(mocks.ItemRepository)
+			ir.On("Delete", mock.Anything, mock.Anything).Return(tc.retErr)
+
+			is := NewItemService(ir)
+
+			err := is.Delete(testItem.ListID, testItem.ID)
+			require.Equal(t, tc.expErr, err)
+		})
+	}
+}
