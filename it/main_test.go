@@ -125,6 +125,13 @@ var getItemUser = &models.User{
 	ActivatedLink: "getItemUser",
 }
 
+var deleteItemUser = &models.User{
+	Email:         "deleteItemUser@mail.ru",
+	Password:      defaultSalt,
+	IsActivated:   true,
+	ActivatedLink: "deleteItemUser",
+}
+
 var dataForInsert = []*models.User{
 	userForCreate,
 	notConfirmedUser,
@@ -139,6 +146,7 @@ var dataForInsert = []*models.User{
 	updateUser,
 	getListsUser,
 	getItemUser,
+	deleteItemUser,
 }
 
 var (

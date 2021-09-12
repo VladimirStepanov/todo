@@ -133,3 +133,86 @@ func (suite *TestingSuite) TestGetItemByID() {
 
 	makeLogout(suite.T(), suite.router, authResp)
 }
+
+func (suite *TestingSuite) TestDeleteItem() {
+	listInput := fmt.Sprintf(
+		`{"title": "%s", "description": "%s"}`,
+		listForCreate.Title, listForCreate.Description,
+	)
+
+	itemInput := fmt.Sprintf(
+		`{"title": "%s", "description": "%s"}`,
+		itemForCreate.Title, itemForCreate.Description,
+	)
+
+	signInInput := fmt.Sprintf(
+		`{"email": "%s", "password": "%s"}`,
+		deleteItemUser.Email, defaultPassword,
+	)
+
+	authResp := makeSignIn(suite.T(), suite.router, signInInput)
+
+	headers := map[string]string{
+		"Authorization": fmt.Sprintf("Bearer %s", authResp.AccessToken),
+	}
+
+	listID := createList(suite.T(), suite.router, listInput, headers)
+	itemID := createItem(suite.T(), listID, suite.router, itemInput, headers)
+
+	tests := []struct {
+		name      string
+		code      int
+		listID    int64
+		itemID    int64
+		expErrMsg string
+	}{
+		{
+			name:      "Item not found",
+			code:      http.StatusNotFound,
+			listID:    listID,
+			itemID:    itemID + 77777,
+			expErrMsg: models.ErrNoItem.Error(),
+		},
+		{
+			name:      "Success delete",
+			code:      http.StatusOK,
+			listID:    listID,
+			itemID:    itemID,
+			expErrMsg: "",
+		},
+	}
+
+	for _, tc := range tests {
+		suite.T().Run(tc.name, func(t *testing.T) {
+			code, responseData := helpers.MakeRequest(
+				suite.router,
+				t,
+				http.MethodDelete,
+				fmt.Sprintf("/api/lists/%d/items/%d", tc.listID, tc.itemID),
+				bytes.NewBuffer([]byte{}),
+				headers,
+			)
+
+			require.Equal(t, tc.code, code)
+
+			if tc.expErrMsg != "" {
+				errResp := &handler.ErrorResponse{}
+				err := json.Unmarshal(responseData, errResp)
+				require.NoError(t, err)
+				require.Equal(t, tc.expErrMsg, errResp.Message)
+			} else {
+				t.Run("Check delete item result", func(t *testing.T) {
+					code, _ := helpers.MakeRequest(
+						suite.router,
+						t,
+						http.MethodGet,
+						fmt.Sprintf("/api/lists/%d/items/%d", tc.listID, tc.itemID),
+						bytes.NewBuffer([]byte{}),
+						headers,
+					)
+					require.Equal(suite.T(), http.StatusNotFound, code)
+				})
+			}
+		})
+	}
+}
