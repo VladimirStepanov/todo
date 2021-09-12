@@ -79,5 +79,33 @@ func (h *Handler) doneItem(c *gin.Context) {
 }
 
 func (h *Handler) deleteItem(c *gin.Context) {
+	listID, _ := strconv.ParseInt(c.Param("list_id"), 10, 64)
+	itemID, err := strconv.ParseInt(c.Param("item_id"), 10, 64)
 
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"status":  "error",
+			"message": models.ErrBadParam.Error(),
+		})
+		return
+	}
+
+	err = h.ItemService.Delete(listID, itemID)
+
+	if err != nil {
+		switch err {
+		case models.ErrNoItem:
+			c.JSON(http.StatusNotFound, gin.H{
+				"status":  "error",
+				"message": err.Error(),
+			})
+		default:
+			h.InternalError(c, err)
+		}
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"status": "success",
+	})
 }
