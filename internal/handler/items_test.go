@@ -409,3 +409,102 @@ func TestUpdateItem(t *testing.T) {
 		})
 	}
 }
+
+func TestDoneItem(t *testing.T) {
+	headers := map[string]string{"Authorization": "Bearer token"}
+	tests := []struct {
+		name   string
+		listID string
+		itemID string
+		retErr error
+		code   int
+		errMsg string
+	}{
+		{
+			name:   "Bad itemID",
+			listID: "1",
+			itemID: "bad",
+			retErr: nil,
+			code:   http.StatusBadRequest,
+			errMsg: models.ErrBadParam.Error(),
+		},
+		{
+			name:   "Empty args",
+			listID: "1",
+			itemID: "1",
+			code:   http.StatusBadRequest,
+			retErr: models.ErrUpdateEmptyArgs,
+			errMsg: models.ErrUpdateEmptyArgs.Error(),
+		},
+		{
+			name:   "Title too short",
+			listID: "1",
+			itemID: "1",
+			code:   http.StatusBadRequest,
+			retErr: models.ErrTitleTooShort,
+			errMsg: models.ErrTitleTooShort.Error(),
+		},
+		{
+			name:   "Return ErrNoItem",
+			listID: "1",
+			itemID: "1",
+			code:   http.StatusNotFound,
+			retErr: models.ErrNoItem,
+			errMsg: models.ErrNoItem.Error(),
+		},
+		{
+			name:   "Unknown error",
+			listID: "1",
+			itemID: "1",
+			code:   http.StatusInternalServerError,
+			retErr: ErrUnknown,
+			errMsg: "Internal server error",
+		},
+		{
+			name:   "Success done",
+			listID: "1",
+			itemID: "1",
+			code:   http.StatusOK,
+			retErr: nil,
+			errMsg: "",
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			tsObj := new(mocks.TokenService)
+			tsObj.On("Verify", mock.Anything).Return(
+				int64(1), "aaa-aaa-aaa-aaa", nil,
+			)
+
+			ls := new(mocks.ListService)
+			ls.On("IsListAdmin", mock.Anything, mock.Anything).Return(
+				nil,
+			)
+
+			is := new(mocks.ItemService)
+			is.On("Done", mock.Anything, mock.Anything).Return(
+				tc.retErr,
+			)
+
+			handler := New(nil, nil, tsObj, ls, is, getTestLogger())
+			r := handler.InitRoutes(gin.TestMode)
+			code, data := helpers.MakeRequest(
+				r,
+				t,
+				http.MethodPatch,
+				fmt.Sprintf("/api/lists/%s/items/%s/done", tc.listID, tc.itemID),
+				bytes.NewBuffer([]byte{}),
+				headers,
+			)
+			require.Equal(t, tc.code, code)
+			if tc.code != 200 {
+				errResp := &ErrorResponse{}
+				err := json.Unmarshal(data, errResp)
+				require.NoError(t, err)
+				require.Equal(t, "error", errResp.Status)
+				require.Equal(t, tc.errMsg, errResp.Message)
+			}
+		})
+	}
+}
