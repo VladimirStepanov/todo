@@ -14,6 +14,6 @@ test:
 	@docker-compose -f docker/docker-compose-test.yml up --build
 
 test.integrations:
-	@docker-compose -f docker/docker-compose-it-tests.yml up --build
+	@docker-compose -f docker/docker-compose-it-tests.yml up --build --abort-on-container-exit --exit-code-from it_test_todo
 
 .PHONY: rebuild prod migrateup migratedown test test.integrations
