@@ -2,6 +2,8 @@ package postgres
 
 import (
 	"database/sql"
+	"fmt"
+	"strings"
 
 	"github.com/VladimirStepanov/todo-app/internal/models"
 	"github.com/jmoiron/sqlx"
@@ -51,6 +53,47 @@ func (ir *PostgresItemRepository) GetItemByID(listID, itemID int64) (*models.Ite
 }
 
 func (ir *PostgresItemRepository) Update(listID, itemID int64, item *models.UpdateItemReq) error {
+	updObj := Updater{
+		args:    []interface{}{},
+		queries: []string{},
+		index:   1,
+	}
+
+	if item.Title != nil {
+		updObj.addUpdateItem("title", *item.Title)
+	}
+
+	if item.Description != nil {
+		updObj.addUpdateItem("description", *item.Description)
+	}
+
+	if item.Done != nil {
+		updObj.addUpdateItem("done", *item.Done)
+	}
+
+	query := fmt.Sprintf(
+		"UPDATE items SET %s WHERE id=$%d AND list_id=$%d",
+		strings.Join(updObj.queries, ","),
+		updObj.index, updObj.index+1,
+	)
+
+	updObj.args = append(updObj.args, itemID, listID)
+	res, err := ir.DB.Exec(query, updObj.args...)
+
+	if err != nil {
+		return err
+	}
+
+	ra, err := res.RowsAffected()
+
+	if err != nil {
+		return err
+	}
+
+	if ra == 0 {
+		return models.ErrNoList
+	}
+
 	return nil
 }
 
