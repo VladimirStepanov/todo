@@ -34,7 +34,9 @@ func (is *ItemService) Update(listID, itemID int64, item *models.UpdateItemReq) 
 }
 
 func (is *ItemService) Done(listID, itemID int64) error {
-	return nil
+	item := &models.UpdateItemReq{Done: new(bool)}
+	*item.Done = true
+	return is.repo.Update(listID, itemID, item)
 }
 
 func (is *ItemService) Delete(listID, itemID int64) error {
