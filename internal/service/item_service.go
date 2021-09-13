@@ -25,7 +25,12 @@ func (is *ItemService) GetItemByID(listID, itemID int64) (*models.Item, error) {
 }
 
 func (is *ItemService) Update(listID, itemID int64, item *models.UpdateItemReq) error {
-	return nil
+	if item.Title == nil && item.Description == nil {
+		return models.ErrUpdateEmptyArgs
+	} else if len(*item.Title) < 5 {
+		return models.ErrTitleTooShort
+	}
+	return is.repo.Update(listID, itemID, item)
 }
 
 func (is *ItemService) Done(listID, itemID int64) error {

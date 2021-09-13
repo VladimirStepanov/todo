@@ -138,3 +138,80 @@ func TestDeleteItem(t *testing.T) {
 		})
 	}
 }
+
+func TestItemUpdate(t *testing.T) {
+	goodReq := &models.UpdateItemReq{
+		Title:       new(string),
+		Description: new(string),
+	}
+
+	*goodReq.Title = "helllo"
+	*goodReq.Description = "world"
+
+	tests := []struct {
+		name   string
+		req    func() *models.UpdateItemReq
+		retErr error
+		expErr error
+	}{
+		{
+			name: "Empty arguments",
+			req: func() *models.UpdateItemReq {
+				return &models.UpdateItemReq{
+					Title:       nil,
+					Description: nil,
+				}
+			},
+			retErr: nil,
+			expErr: models.ErrUpdateEmptyArgs,
+		},
+		{
+			name: "Title too short error",
+			req: func() *models.UpdateItemReq {
+				title := "123"
+				return &models.UpdateItemReq{
+					Title:       &title,
+					Description: nil,
+				}
+			},
+			retErr: nil,
+			expErr: models.ErrTitleTooShort,
+		},
+		{
+			name: "Return unknown error",
+			req: func() *models.UpdateItemReq {
+				return goodReq
+			},
+			retErr: ErrSome,
+			expErr: ErrSome,
+		},
+		{
+			name: "Return ErrNoItem error",
+			req: func() *models.UpdateItemReq {
+				return goodReq
+			},
+			retErr: models.ErrNoItem,
+			expErr: models.ErrNoItem,
+		},
+		{
+			name: "Success update",
+			req: func() *models.UpdateItemReq {
+				return goodReq
+			},
+			retErr: nil,
+			expErr: nil,
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			ir := new(mocks.ItemRepository)
+			ir.On("Update", mock.Anything, mock.Anything, mock.Anything).Return(tc.retErr)
+
+			is := NewItemService(ir)
+
+			err := is.Update(1, 1, tc.req())
+			require.Equal(t, tc.expErr, err)
+		})
+	}
+}
