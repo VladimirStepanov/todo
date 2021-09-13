@@ -216,3 +216,102 @@ func (suite *TestingSuite) TestDeleteItem() {
 		})
 	}
 }
+
+func (suite *TestingSuite) TestUpdateItem() {
+	uitem := models.Item{
+		Title:       "Title for update",
+		Description: "Description",
+	}
+
+	updateInput := fmt.Sprintf(
+		`{"title": "%s", "description": "%s"}`,
+		uitem.Title, uitem.Description,
+	)
+
+	listInput := fmt.Sprintf(
+		`{"title": "%s", "description": "%s"}`,
+		listForCreate.Title, listForCreate.Description,
+	)
+
+	itemInput := fmt.Sprintf(
+		`{"title": "%s", "description": "%s"}`,
+		itemForCreate.Title, itemForCreate.Description,
+	)
+
+	signInInput := fmt.Sprintf(
+		`{"email": "%s", "password": "%s"}`,
+		updateItemUser.Email, defaultPassword,
+	)
+
+	authResp := makeSignIn(suite.T(), suite.router, signInInput)
+
+	headers := map[string]string{
+		"Authorization": fmt.Sprintf("Bearer %s", authResp.AccessToken),
+	}
+
+	listID := createList(suite.T(), suite.router, listInput, headers)
+	itemID := createItem(suite.T(), listID, suite.router, itemInput, headers)
+
+	tests := []struct {
+		name      string
+		code      int
+		listID    int64
+		itemID    int64
+		expErrMsg string
+	}{
+		{
+			name:      "Item not found",
+			code:      http.StatusNotFound,
+			listID:    listID,
+			itemID:    itemID + 77777,
+			expErrMsg: models.ErrNoItem.Error(),
+		},
+		{
+			name:      "Success update",
+			code:      http.StatusOK,
+			listID:    listID,
+			itemID:    itemID,
+			expErrMsg: "",
+		},
+	}
+
+	for _, tc := range tests {
+		suite.T().Run(tc.name, func(t *testing.T) {
+			code, responseData := helpers.MakeRequest(
+				suite.router,
+				t,
+				http.MethodPatch,
+				fmt.Sprintf("/api/lists/%d/items/%d", tc.listID, tc.itemID),
+				bytes.NewBuffer([]byte(updateInput)),
+				headers,
+			)
+
+			require.Equal(t, tc.code, code)
+
+			if tc.expErrMsg != "" {
+				errResp := &handler.ErrorResponse{}
+				err := json.Unmarshal(responseData, errResp)
+				require.NoError(t, err)
+				require.Equal(t, tc.expErrMsg, errResp.Message)
+			} else {
+				t.Run("Check update result", func(t *testing.T) {
+					code, getData := helpers.MakeRequest(
+						suite.router,
+						t,
+						http.MethodGet,
+						fmt.Sprintf("/api/lists/%d/items/%d", tc.listID, tc.itemID),
+						bytes.NewBuffer([]byte{}),
+						headers,
+					)
+					require.Equal(t, http.StatusOK, code)
+					item := &models.Item{}
+					err := json.Unmarshal(getData, item)
+					require.NoError(t, err)
+					require.Equal(t, uitem.Title, item.Title)
+					require.Equal(t, uitem.Description, item.Description)
+					require.Equal(t, itemID, item.ID)
+				})
+			}
+		})
+	}
+}
