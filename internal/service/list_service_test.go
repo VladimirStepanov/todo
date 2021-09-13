@@ -264,7 +264,7 @@ func TestUpdate(t *testing.T) {
 			expErr: models.ErrNoList,
 		},
 		{
-			name: "Success grant role",
+			name: "Success update",
 			req: func() *models.UpdateListReq {
 				return goodReq
 			},
