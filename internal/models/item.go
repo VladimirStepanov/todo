@@ -11,5 +11,5 @@ type Item struct {
 type UpdateItemReq struct {
 	Title       *string `json:"title"`
 	Description *string `json:"description"`
-	Done        *bool   `json:"done"`
+	Done        *bool
 }
