@@ -139,6 +139,13 @@ var updateItemUser = &models.User{
 	ActivatedLink: "updateItemUser",
 }
 
+var doneItemUser = &models.User{
+	Email:         "doneItemUser@mail.ru",
+	Password:      defaultSalt,
+	IsActivated:   true,
+	ActivatedLink: "doneItemUser",
+}
+
 var dataForInsert = []*models.User{
 	userForCreate,
 	notConfirmedUser,
@@ -155,6 +162,7 @@ var dataForInsert = []*models.User{
 	getItemUser,
 	deleteItemUser,
 	updateItemUser,
+	doneItemUser,
 }
 
 var (
