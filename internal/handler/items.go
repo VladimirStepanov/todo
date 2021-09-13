@@ -71,11 +71,50 @@ func (h *Handler) getItemByID(c *gin.Context) {
 }
 
 func (h *Handler) updateItem(c *gin.Context) {
+	listID, _ := strconv.ParseInt(c.Param("list_id"), 10, 64)
+	itemID, err := strconv.ParseInt(c.Param("item_id"), 10, 64)
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"status":  "error",
+			"message": models.ErrBadParam.Error(),
+		})
+		return
+	}
+
+	req := &models.UpdateItemReq{}
+
+	if !bindData(c, req) {
+		return
+	}
+
+	err = h.ItemService.Update(listID, itemID, req)
+
+	if err != nil {
+		switch err {
+		case models.ErrUpdateEmptyArgs, models.ErrTitleTooShort:
+			c.JSON(http.StatusBadRequest, gin.H{
+				"status":  "error",
+				"message": err.Error(),
+			})
+		case models.ErrNoItem:
+			c.JSON(http.StatusNotFound, gin.H{
+				"status":  "error",
+				"message": err.Error(),
+			})
+		default:
+			h.InternalError(c, err)
+		}
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"status": "success",
+	})
 
 }
 
 func (h *Handler) doneItem(c *gin.Context) {
-
 }
 
 func (h *Handler) deleteItem(c *gin.Context) {
