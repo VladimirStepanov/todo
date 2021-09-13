@@ -415,7 +415,7 @@ func TestUpdateList(t *testing.T) {
 			errMsg:       models.ErrTitleTooShort.Error(),
 		},
 		{
-			name:         "Title too short",
+			name:         "Return ErrNoList",
 			code:         http.StatusNotFound,
 			input:        `{"title": "123456", "description": "hello world"}`,
 			updateRetErr: models.ErrNoList,
