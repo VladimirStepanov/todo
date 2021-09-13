@@ -249,14 +249,14 @@ func TestUpdateItem(t *testing.T) {
 			expErr: ErrUnknown,
 		},
 		{
-			name: "Update return ErrNoList",
+			name: "Update return ErrNoItem",
 			setMock: func(m sqlmock.Sqlmock, e error) {
 				m.ExpectExec("UPDATE items").
 					WithArgs(*req.Title, *req.Description, *req.Done, 1, 1).
 					WillReturnResult(sqlmock.NewResult(0, 0))
 			},
 			retErr: nil,
-			expErr: models.ErrNoList,
+			expErr: models.ErrNoItem,
 		},
 		{
 			name: "Success update",

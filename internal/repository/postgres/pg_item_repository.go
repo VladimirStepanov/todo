@@ -91,7 +91,7 @@ func (ir *PostgresItemRepository) Update(listID, itemID int64, item *models.Upda
 	}
 
 	if ra == 0 {
-		return models.ErrNoList
+		return models.ErrNoItem
 	}
 
 	return nil
