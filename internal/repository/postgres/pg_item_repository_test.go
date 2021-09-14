@@ -278,3 +278,74 @@ func TestUpdateItem(t *testing.T) {
 		})
 	}
 }
+
+func TestGetItems(t *testing.T) {
+	mockDB, mock, err := sqlmock.New()
+
+	if err != nil {
+		t.Fatal("Error while sqlmock.New()", err)
+	}
+
+	defer mockDB.Close()
+
+	db := sqlx.NewDb(mockDB, "sqlmock")
+
+	ir := NewPostgresItemRepository(db)
+
+	expItems := []*models.Item{
+		{
+			ID:          1,
+			Title:       "title#1",
+			Description: "description#1",
+		},
+		{
+			ID:          2,
+			Title:       "title#2",
+			Description: "description#2",
+		},
+	}
+
+	tests := []struct {
+		name    string
+		setMock func(m sqlmock.Sqlmock, e error)
+		retErr  error
+		expErr  error
+		expRes  []*models.Item
+	}{
+		{
+			name: "Return unknown error",
+			setMock: func(m sqlmock.Sqlmock, e error) {
+				m.ExpectQuery(regexp.QuoteMeta("SELECT * FROM items")).
+					WithArgs(1).
+					WillReturnError(e)
+			},
+			retErr: ErrUnknown,
+			expErr: ErrUnknown,
+			expRes: nil,
+		},
+		{
+			name: "Success get items",
+			setMock: func(m sqlmock.Sqlmock, e error) {
+				rows := sqlmock.NewRows([]string{"id", "title", "description"})
+				for _, r := range expItems {
+					rows.AddRow(r.ID, r.Title, r.Description)
+				}
+				m.ExpectQuery(regexp.QuoteMeta("SELECT * FROM items")).
+					WithArgs(1).
+					WillReturnRows(rows)
+			},
+			retErr: nil,
+			expErr: nil,
+			expRes: expItems,
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			tc.setMock(mock, tc.retErr)
+			res, err := ir.GetItems(1)
+			require.Equal(t, tc.expErr, err)
+			require.Equal(t, tc.expRes, res)
+		})
+	}
+}

@@ -35,7 +35,14 @@ func (ir *PostgresItemRepository) Create(title, description string, listID int64
 }
 
 func (ir *PostgresItemRepository) GetItems(listID int64) ([]*models.Item, error) {
-	return nil, nil
+	res := []*models.Item{}
+
+	err := ir.DB.Select(&res, `SELECT * FROM items WHERE list_id=$1`, listID)
+
+	if err != nil {
+		return nil, err
+	}
+	return res, nil
 }
 
 func (ir *PostgresItemRepository) GetItemByID(listID, itemID int64) (*models.Item, error) {
