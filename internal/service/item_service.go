@@ -17,7 +17,7 @@ func (is *ItemService) Create(title, description string, listID int64) (int64, e
 }
 
 func (is *ItemService) GetItems(listID int64) ([]*models.Item, error) {
-	return nil, nil
+	return is.repo.GetItems(listID)
 }
 
 func (is *ItemService) GetItemByID(listID, itemID int64) (*models.Item, error) {
