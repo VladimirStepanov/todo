@@ -403,3 +403,52 @@ func (suite *TestingSuite) TestDoneItem() {
 		})
 	}
 }
+
+func (suite *TestingSuite) TestGetItems() {
+	listInput := fmt.Sprintf(
+		`{"title": "%s", "description": "%s"}`,
+		listForCreate.Title, listForCreate.Description,
+	)
+
+	signInInput := fmt.Sprintf(
+		`{"email": "%s", "password": "%s"}`,
+		getItemsUser.Email, defaultPassword,
+	)
+
+	authResp := makeSignIn(suite.T(), suite.router, signInInput)
+
+	headers := map[string]string{
+		"Authorization": fmt.Sprintf("Bearer %s", authResp.AccessToken),
+	}
+
+	listID := createList(suite.T(), suite.router, listInput, headers)
+
+	for _, itm := range helpers.ExpItems {
+		itemInput := fmt.Sprintf(
+			`{"title": "%s", "description": "%s"}`,
+			itm.Title, itm.Description,
+		)
+		createItem(suite.T(), listID, suite.router, itemInput, headers)
+	}
+
+	suite.T().Run("Check get items", func(t *testing.T) {
+		code, responseData := helpers.MakeRequest(
+			suite.router,
+			t,
+			http.MethodGet,
+			fmt.Sprintf("/api/lists/%d/items", listID),
+			bytes.NewBuffer([]byte{}),
+			headers,
+		)
+		require.Equal(t, http.StatusOK, code)
+		resp := handler.UserItemsResponse{}
+		require.NoError(t, json.Unmarshal(responseData, &resp))
+		require.Equal(t, "success", resp.Status)
+		for i, l := range resp.Result {
+			require.Equal(t, helpers.ExpItems[i].Title, l.Title)
+			require.Equal(t, helpers.ExpItems[i].Description, l.Description)
+			require.Equal(t, listID, l.ListID)
+			require.Equal(t, false, l.Done)
+		}
+	})
+}
