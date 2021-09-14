@@ -26,6 +26,25 @@ var (
 	}
 )
 
+var (
+	ExpItems = []*models.Item{
+		{
+			ID:          1,
+			ListID:      20,
+			Title:       "title#1",
+			Description: "description#1",
+			Done:        true,
+		},
+		{
+			ID:          2,
+			ListID:      10,
+			Title:       "title#2",
+			Description: "description#2",
+			Done:        false,
+		},
+	}
+)
+
 func MakeRequest(router http.Handler, t *testing.T, method, path string, input *bytes.Buffer, headers map[string]string) (int, []byte) {
 	req := httptest.NewRequest(method, path, input)
 	req.Header.Set("Content-Type", "application/json")

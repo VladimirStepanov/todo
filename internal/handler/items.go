@@ -35,6 +35,16 @@ func (h *Handler) itemCreate(c *gin.Context) {
 }
 
 func (h *Handler) getItems(c *gin.Context) {
+	listID, _ := strconv.ParseInt(c.Param("list_id"), 10, 64)
+
+	result, err := h.ItemService.GetItems(listID)
+
+	if err != nil {
+		h.InternalError(c, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"status": "success", "result": result})
 
 }
 
