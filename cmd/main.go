@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 
+	"github.com/VladimirStepanov/todo-app/docs"
 	"github.com/VladimirStepanov/todo-app/internal/config"
 	"github.com/VladimirStepanov/todo-app/internal/handler"
 	"github.com/VladimirStepanov/todo-app/internal/repository/postgres"
@@ -11,6 +12,16 @@ import (
 	"github.com/VladimirStepanov/todo-app/internal/service"
 	"github.com/VladimirStepanov/todo-app/pkg/logging"
 )
+
+// @title Todo App API
+// @version 1.0
+// @description API Server for TodoList Application
+
+// @BasePath /
+
+// @securityDefinitions.apikey ApiKeyAuth
+// @in header
+// @name Authorization
 
 func main() {
 	cfg, err := config.New(".env")
@@ -55,6 +66,7 @@ func main() {
 
 	handler := handler.New(userService, mailService, tokenService, listService, itemService, logger)
 
+	docs.SwaggerInfo.Host = cfg.Domain
 	srv := server.New(cfg.GetServerAddr(), handler.InitRoutes(cfg.Mode))
 	if err := srv.Run(); err != nil {
 		log.Fatal(err)
