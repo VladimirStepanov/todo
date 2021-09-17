@@ -7,6 +7,24 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+type signupReq struct {
+	Email    string `json:"email" binding:"required,email"`
+	Password string `json:"password" binding:"required,gte=8,lte=32"`
+}
+
+// SignIn godoc
+// @Summary Sign in
+// @Accept  json
+// @Produce  json
+// @ID login
+// @Param input body signupReq true "credentials"
+// @Success 200 {object} TokensResponse	"tokens"
+// @Failure 400 {object} ErrorResponse	"bad input"
+// @Failure 401 {object} ErrorResponse "user not activated"
+// @Failure 404 {object} ErrorResponse "user not found"
+// @Failure 422 {object} ErrorResponse "max logged in users in one account"
+// @Failure 500 {object} ErrorResponse "internal error"
+// @Router /auth/sign-in [post]
 func (h *Handler) signIn(c *gin.Context) {
 	var req signupReq
 	if !bindData(c, &req) {
@@ -53,11 +71,17 @@ func (h *Handler) signIn(c *gin.Context) {
 	})
 }
 
-type signupReq struct {
-	Email    string `json:"email" binding:"required,email"`
-	Password string `json:"password" binding:"required,gte=8,lte=32"`
-}
-
+// SignUp godoc
+// @Summary Sign up
+// @Accept  json
+// @Produce  json
+// @ID register
+// @Param input body signupReq true "register"
+// @Success 200 {string} status	"success"
+// @Failure 400 {object} ErrorResponse	"bad input"
+// @Failure 409 {object} ErrorResponse "user already exists"
+// @Failure 500 {object} ErrorResponse "internal error"
+// @Router /auth/sign-up [post]
 func (h *Handler) signUp(c *gin.Context) {
 	var req signupReq
 	if ok := bindData(c, &req); !ok {
@@ -90,6 +114,17 @@ func (h *Handler) signUp(c *gin.Context) {
 	})
 }
 
+// Logout godoc
+// @Summary Log out
+// @Accept  json
+// @Produce  json
+// @ID logout
+// @Security ApiKeyAuth
+// @Success 200 {string} status	"success"
+// @Failure 400 {object} ErrorResponse "auth header errrors"
+// @Failure 401 {object} ErrorResponse "user unauthorized"
+// @Failure 500 {object} ErrorResponse "internal error"
+// @Router /auth/logout [get]
 func (h *Handler) logout(c *gin.Context) {
 	userID, err := h.GetUserId(c)
 	if err != nil {
@@ -112,6 +147,16 @@ func (h *Handler) logout(c *gin.Context) {
 	})
 }
 
+// Confirm godoc
+// @Summary Confirm email
+// @Accept  json
+// @Produce  json
+// @ID confirm
+// @Param link path string true "link confirmation"
+// @Success 200 {string} status	"success"
+// @Failure 404 {object} ErrorResponse	"page not found"
+// @Failure 500 {object} ErrorResponse "internal error"
+// @Router /auth/confirm/{link} [get]
 func (h *Handler) confirm(c *gin.Context) {
 	link := c.Param("link")
 
@@ -136,6 +181,17 @@ type refreshReq struct {
 	Token string `json:"refresh_token" binding:"required"`
 }
 
+// RefreshToken godoc
+// @Summary Refresh token
+// @Accept  json
+// @Produce  json
+// @ID refresh-token
+// @Param input body refreshReq true "refresh token"
+// @Success 200 {object} TokensResponse	"tokens"
+// @Failure 400 {object} ErrorResponse	"bad token"
+// @Failure 401 {object} ErrorResponse "user unauthorized"
+// @Failure 500 {object} ErrorResponse "internal error"
+// @Router /auth/refresh [post]
 func (h *Handler) refreshToken(c *gin.Context) {
 	var req refreshReq
 	if ok := bindData(c, &req); !ok {
