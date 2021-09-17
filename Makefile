@@ -4,6 +4,9 @@ rebuild:
 prod:
 	@docker-compose -f docker/docker-compose-prod.yml up -d
 
+swag:
+	swag init --parseInternal=true -g cmd/main.go
+
 migrateup:
 	@/bin/bash scripts/migrate.sh up
 
