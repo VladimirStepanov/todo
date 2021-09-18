@@ -5,7 +5,9 @@ prod:
 	@docker-compose -f docker/docker-compose-prod.yml up -d
 
 swag:
-	swag init --parseInternal=true -g cmd/main.go
+	@echo "package kk" > dummy.go
+	@swag init --parseInternal=true -g cmd/main.go
+	@rm -f dummy.go
 
 migrateup:
 	@/bin/bash scripts/migrate.sh up
