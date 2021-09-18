@@ -1,0 +1,812 @@
+basePath: /
+definitions:
+  handler.ErrorResponse:
+    properties:
+      message:
+        type: string
+      status:
+        type: string
+    type: object
+  handler.ItemCreateResponse:
+    properties:
+      item_id:
+        type: integer
+      status:
+        type: string
+    type: object
+  handler.ListCreateResponse:
+    properties:
+      list_id:
+        type: integer
+      status:
+        type: string
+    type: object
+  handler.TokensResponse:
+    properties:
+      access_token:
+        type: string
+      refresh_token:
+        type: string
+    type: object
+  handler.UserItemsResponse:
+    properties:
+      result:
+        items:
+          $ref: '#/definitions/models.Item'
+        type: array
+      status:
+        type: string
+    type: object
+  handler.UserListsResponse:
+    properties:
+      result:
+        items:
+          $ref: '#/definitions/models.List'
+        type: array
+      status:
+        type: string
+    type: object
+  handler.editRoleReq:
+    properties:
+      is_admin:
+        type: boolean
+      user_id:
+        type: integer
+    required:
+    - is_admin
+    - user_id
+    type: object
+  handler.itemCreateReq:
+    properties:
+      description:
+        type: string
+      title:
+        type: string
+    required:
+    - description
+    - title
+    type: object
+  handler.listCreateReq:
+    properties:
+      description:
+        type: string
+      title:
+        type: string
+    required:
+    - description
+    - title
+    type: object
+  handler.refreshReq:
+    properties:
+      refresh_token:
+        type: string
+    required:
+    - refresh_token
+    type: object
+  handler.signupReq:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  models.Item:
+    properties:
+      description:
+        type: string
+      done:
+        type: boolean
+      id:
+        type: integer
+      list_id:
+        type: integer
+      title:
+        type: string
+    type: object
+  models.List:
+    properties:
+      description:
+        type: string
+      list_id:
+        type: integer
+      title:
+        type: string
+    type: object
+  models.UpdateItemReq:
+    properties:
+      description:
+        type: string
+      title:
+        type: string
+    type: object
+  models.UpdateListReq:
+    properties:
+      description:
+        type: string
+      title:
+        type: string
+    type: object
+info:
+  contact: {}
+  description: API Server for TodoList Application
+  title: Todo App API
+  version: "1.0"
+paths:
+  /api/lists:
+    get:
+      operationId: get-lists
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: lists
+          schema:
+            $ref: '#/definitions/handler.UserListsResponse'
+        "401":
+          description: user is not authorized
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+        "404":
+          description: user not found
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+        "500":
+          description: internal error
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Get all user lists
+      tags:
+      - lists
+    post:
+      consumes:
+      - application/json
+      operationId: create-list
+      parameters:
+      - description: list input
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/handler.listCreateReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success list creation
+          schema:
+            $ref: '#/definitions/handler.ListCreateResponse'
+        "400":
+          description: bad input, auth header errors
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+        "401":
+          description: user is not authorized
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+        "404":
+          description: list not found
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+        "500":
+          description: internal error
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Create list
+      tags:
+      - lists
+  /api/lists/{list_id}:
+    delete:
+      operationId: delete-list
+      parameters:
+      - description: list_id
+        in: path
+        name: list_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success
+          schema:
+            type: string
+        "400":
+          description: bad input, auth header errors
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+        "401":
+          description: user is not authorized
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+        "403":
+          description: current user is not admin
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+        "404":
+          description: list not found
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+        "500":
+          description: internal error
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Delete list by id
+      tags:
+      - lists
+    get:
+      operationId: get-list
+      parameters:
+      - description: list_id
+        in: path
+        name: list_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: list
+          schema:
+            $ref: '#/definitions/models.List'
+        "400":
+          description: bad input, auth header errors
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+        "401":
+          description: user is not authorized
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+        "404":
+          description: list not found
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+        "500":
+          description: internal error
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Get list by id
+      tags:
+      - lists
+    patch:
+      operationId: delete-list
+      parameters:
+      - description: list_id
+        in: path
+        name: list_id
+        required: true
+        type: integer
+      - description: input
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/models.UpdateListReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success
+          schema:
+            type: string
+        "400":
+          description: bad input, auth header errors
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+        "401":
+          description: user is not authorized
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+        "403":
+          description: current user is not admin
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+        "404":
+          description: list not found
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+        "500":
+          description: internal error
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Update list by id
+      tags:
+      - lists
+  /api/lists/{list_id}/edit-role:
+    patch:
+      consumes:
+      - application/json
+      operationId: edit-role
+      parameters:
+      - description: list_id
+        in: path
+        name: list_id
+        required: true
+        type: integer
+      - description: edit-role input
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/handler.editRoleReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success
+          schema:
+            type: string
+        "400":
+          description: bad input, auth header errors
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+        "401":
+          description: user is not authorized
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+        "403":
+          description: current user is not admin
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+        "404":
+          description: list not found, user not found
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+        "500":
+          description: internal error
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Edit user role for list
+      tags:
+      - lists
+  /api/lists/{list_id}/items:
+    get:
+      consumes:
+      - application/json
+      operationId: get-items
+      parameters:
+      - description: list_id
+        in: path
+        name: list_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: all user items
+          schema:
+            $ref: '#/definitions/handler.UserItemsResponse'
+        "400":
+          description: bad input, auth header errors
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+        "401":
+          description: user is not authorized
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+        "404":
+          description: list not found
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+        "500":
+          description: internal error
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Get items
+      tags:
+      - items
+    post:
+      consumes:
+      - application/json
+      operationId: create-item
+      parameters:
+      - description: list_id
+        in: path
+        name: list_id
+        required: true
+        type: integer
+      - description: item input
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/handler.itemCreateReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success item creation
+          schema:
+            $ref: '#/definitions/handler.ItemCreateResponse'
+        "400":
+          description: bad input, auth header errors
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+        "401":
+          description: user is not authorized
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+        "404":
+          description: list not found
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+        "500":
+          description: internal error
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Create item
+      tags:
+      - items
+  /api/lists/{list_id}/items/{item_id}:
+    delete:
+      consumes:
+      - application/json
+      operationId: delete-item
+      parameters:
+      - description: list_id
+        in: path
+        name: list_id
+        required: true
+        type: integer
+      - description: item_id
+        in: path
+        name: item_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success
+          schema:
+            type: string
+        "400":
+          description: bad input, auth header errors
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+        "401":
+          description: user is not authorized
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+        "404":
+          description: list not found, item not found
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+        "500":
+          description: internal error
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Delete item
+      tags:
+      - items
+    get:
+      consumes:
+      - application/json
+      operationId: get-item
+      parameters:
+      - description: list_id
+        in: path
+        name: list_id
+        required: true
+        type: integer
+      - description: item_id
+        in: path
+        name: item_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: item
+          schema:
+            $ref: '#/definitions/models.Item'
+        "400":
+          description: bad input, auth header errors
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+        "401":
+          description: user is not authorized
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+        "404":
+          description: list not found, item not found
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+        "500":
+          description: internal error
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Get item
+      tags:
+      - items
+    patch:
+      consumes:
+      - application/json
+      operationId: update-item
+      parameters:
+      - description: list_id
+        in: path
+        name: list_id
+        required: true
+        type: integer
+      - description: item_id
+        in: path
+        name: item_id
+        required: true
+        type: integer
+      - description: input
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/models.UpdateItemReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success
+          schema:
+            type: string
+        "400":
+          description: bad input, auth header errors
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+        "401":
+          description: user is not authorized
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+        "404":
+          description: list not found, item not found
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+        "500":
+          description: internal error
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Update item
+      tags:
+      - items
+  /api/lists/{list_id}/items/{item_id}/done:
+    patch:
+      consumes:
+      - application/json
+      operationId: done-item
+      parameters:
+      - description: list_id
+        in: path
+        name: list_id
+        required: true
+        type: integer
+      - description: item_id
+        in: path
+        name: item_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success
+          schema:
+            type: string
+        "400":
+          description: bad input, auth header errors
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+        "401":
+          description: user is not authorized
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+        "404":
+          description: list not found, item not found
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+        "500":
+          description: internal error
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Done item
+      tags:
+      - items
+  /auth/confirm/{link}:
+    get:
+      consumes:
+      - application/json
+      operationId: confirm
+      parameters:
+      - description: link confirmation
+        in: path
+        name: link
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success
+          schema:
+            type: string
+        "404":
+          description: page not found
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+        "500":
+          description: internal error
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+      summary: Confirm email
+      tags:
+      - auth
+  /auth/logout:
+    get:
+      consumes:
+      - application/json
+      operationId: logout
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success
+          schema:
+            type: string
+        "400":
+          description: auth header errors
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+        "401":
+          description: user unauthorized
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+        "500":
+          description: internal error
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Log out
+      tags:
+      - auth
+  /auth/refresh:
+    post:
+      consumes:
+      - application/json
+      operationId: refresh-token
+      parameters:
+      - description: refresh token
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/handler.refreshReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: tokens
+          schema:
+            $ref: '#/definitions/handler.TokensResponse'
+        "400":
+          description: bad token
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+        "401":
+          description: user unauthorized
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+        "500":
+          description: internal error
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+      summary: Refresh token
+      tags:
+      - auth
+  /auth/sign-in:
+    post:
+      consumes:
+      - application/json
+      operationId: login
+      parameters:
+      - description: credentials
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/handler.signupReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: tokens
+          schema:
+            $ref: '#/definitions/handler.TokensResponse'
+        "400":
+          description: bad input
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+        "401":
+          description: user not activated
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+        "404":
+          description: user not found
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+        "422":
+          description: max logged in users in one account
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+        "500":
+          description: internal error
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+      summary: Sign in
+      tags:
+      - auth
+  /auth/sign-up:
+    post:
+      consumes:
+      - application/json
+      operationId: register
+      parameters:
+      - description: register
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/handler.signupReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success
+          schema:
+            type: string
+        "400":
+          description: bad input
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+        "409":
+          description: user already exists
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+        "500":
+          description: internal error
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+      summary: Sign up
+      tags:
+      - auth
+securityDefinitions:
+  ApiKeyAuth:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"
