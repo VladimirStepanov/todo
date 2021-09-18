@@ -121,7 +121,7 @@ func (h *Handler) signUp(c *gin.Context) {
 // @ID logout
 // @Security ApiKeyAuth
 // @Success 200 {string} status	"success"
-// @Failure 400 {object} ErrorResponse "auth header errrors"
+// @Failure 400 {object} ErrorResponse "auth header errors"
 // @Failure 401 {object} ErrorResponse "user unauthorized"
 // @Failure 500 {object} ErrorResponse "internal error"
 // @Router /auth/logout [get]
