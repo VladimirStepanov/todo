@@ -13,6 +13,7 @@ type signupReq struct {
 }
 
 // SignIn godoc
+// @Tags auth
 // @Summary Sign in
 // @Accept  json
 // @Produce  json
@@ -73,6 +74,7 @@ func (h *Handler) signIn(c *gin.Context) {
 
 // SignUp godoc
 // @Summary Sign up
+// @Tags auth
 // @Accept  json
 // @Produce  json
 // @ID register
@@ -116,6 +118,7 @@ func (h *Handler) signUp(c *gin.Context) {
 
 // Logout godoc
 // @Summary Log out
+// @Tags auth
 // @Accept  json
 // @Produce  json
 // @ID logout
@@ -149,6 +152,7 @@ func (h *Handler) logout(c *gin.Context) {
 
 // Confirm godoc
 // @Summary Confirm email
+// @Tags auth
 // @Accept  json
 // @Produce  json
 // @ID confirm
@@ -183,6 +187,7 @@ type refreshReq struct {
 
 // RefreshToken godoc
 // @Summary Refresh token
+// @Tags auth
 // @Accept  json
 // @Produce  json
 // @ID refresh-token
